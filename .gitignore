@@ -1,0 +1,17 @@
+# Dependencias de Node — no se suben al repo
+node_modules/
+
+# Variables de entorno reales — NUNCA subir al repo
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

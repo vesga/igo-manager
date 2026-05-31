@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi diagnóstico · IGO Manager</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body class="app-body">
+
+  <nav class="app-navbar">
+    <a href="/app/dashboard" class="auth-logo">
+      <div class="brand-icon">I</div>
+      <span class="brand-name">IGO Manager</span>
+    </a>
+    <div class="app-nav-right">
+      <span class="nav-user" id="navUser">···</span>
+      <a href="/app/perfil" class="btn-nav-ghost">Perfil</a>
+      <a href="/logout"     class="btn-nav-ghost">Salir</a>
+    </div>
+  </nav>
+
+  <div class="app-container" style="max-width:1100px">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title" id="titleBienvenida">Mi diagnóstico IGO</h1>
+        <p class="page-subtitle">Registra tus iniciativas, califícalas y ve en qué cuadrante caen.</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-secondary" id="btnResumen">✨ Resumen ejecutivo</button>
+        <button class="btn-primary"   id="btnNuevaIniciativa">+ Nueva iniciativa</button>
+      </div>
+    </div>
+
+    <div class="alert alert-error"   id="alertError"   style="display:none"></div>
+    <div class="alert alert-success" id="alertSuccess" style="display:none"></div>
+
+    <div class="dash-layout">
+
+      <!-- Columna izquierda: iniciativas -->
+      <section class="dash-col-left">
+        <div class="col-header">
+          <h2>Iniciativas <span class="badge" id="badgeCount">0</span></h2>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">💡</div>
+          <p>Aún no tienes iniciativas.<br/>Pulsa "+ Nueva iniciativa" para empezar.</p>
+        </div>
+
+        <div id="listaIniciativas"></div>
+      </section>
+
+      <!-- Columna derecha: matriz -->
+      <section class="dash-col-right">
+        <div class="col-header">
+          <h2>Matriz IGO</h2>
+          <span class="col-hint" id="matrizHint">Califica iniciativas para verlas aquí</span>
+        </div>
+
+        <div class="canvas-wrapper">
+          <canvas id="canvasIGO" width="440" height="360"></canvas>
+        </div>
+
+        <div class="recomendaciones" id="recomendaciones" style="display:none">
+          <h3>Recomendaciones</h3>
+          <div class="recom-grid">
+            <div class="recom-card recom-hacer_ya">
+              <div class="recom-label">¡Hacer Ya!</div>
+              <p id="recomHacerYa"></p>
+            </div>
+            <div class="recom-card recom-estrategico">
+              <div class="recom-label">Estratégico</div>
+              <p id="recomEstrategico"></p>
+            </div>
+            <div class="recom-card recom-rutina">
+              <div class="recom-label">Rutina</div>
+              <p id="recomRutina"></p>
+            </div>
+            <div class="recom-card recom-descarte">
+              <div class="recom-label">Descarte</div>
+              <p id="recomDescarte"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal: crear / editar iniciativa -->
+  <div class="modal-overlay" id="modalIniciativa" style="display:none">
+    <div class="modal-box modal-wide">
+      <button class="modal-close" id="btnCerrarModal">&times;</button>
+      <h2 id="modalTitulo">Nueva iniciativa</h2>
+
+      <div class="form-group">
+        <label for="inputTitulo">Título *</label>
+        <input type="text" id="inputTitulo" placeholder="Ej: Mejorar el proceso de ventas" maxlength="200" />
+        <span class="form-hint">Describe la necesidad o iniciativa en pocas palabras</span>
+      </div>
+
+      <div class="form-group">
+        <label for="inputDescripcion">Descripción</label>
+        <textarea id="inputDescripcion" rows="3" placeholder="Contexto adicional (opcional)"></textarea>
+      </div>
+
+      <input type="hidden" id="modalIdIniciativa" value="" />
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarModal">Cancelar</button>
+        <button class="btn-primary"   id="btnGuardarModal">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: calificar -->
+  <div class="modal-overlay" id="modalCalificar" style="display:none">
+    <div class="modal-box modal-wide">
+      <button class="modal-close" id="btnCerrarCalificar">&times;</button>
+      <h2 id="calificarTitulo">Calificar</h2>
+
+      <p class="modal-intro">
+        Asigna un valor de <strong>1 a 10</strong> según tu criterio.
+        Tú eres quien mejor conoce tu negocio — sin inteligencia artificial.
+      </p>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <div>
+            <label class="slider-label">Importancia</label>
+            <p class="slider-hint">¿Qué tan crítica es para el crecimiento o supervivencia del negocio?</p>
+          </div>
+          <div class="slider-val" id="valImportancia">5</div>
+        </div>
+        <input type="range" id="sliderImportancia" min="1" max="10" value="5" class="slider" />
+        <div class="slider-ticks"><span>1 · Poco</span><span>5 · Medio</span><span>10 · Crítico</span></div>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <div>
+            <label class="slider-label">Gobernabilidad</label>
+            <p class="slider-hint">¿Cuánta capacidad tiene tu empresa para ejecutarla con los recursos actuales?</p>
+          </div>
+          <div class="slider-val" id="valGobernabilidad">5</div>
+        </div>
+        <input type="range" id="sliderGobernabilidad" min="1" max="10" value="5" class="slider" />
+        <div class="slider-ticks"><span>1 · Difícil</span><span>5 · Posible</span><span>10 · Fácil</span></div>
+      </div>
+
+      <input type="hidden" id="calificarId" value="" />
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarCalificar">Cancelar</button>
+        <button class="btn-primary"   id="btnGuardarCalificacion">Guardar calificación</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Resumen ejecutivo IA -->
+  <div class="modal-overlay" id="modalResumen" style="display:none">
+    <div class="modal-box modal-resumen">
+      <button class="modal-close" id="btnCerrarResumen">&times;</button>
+      <div class="resumen-header">
+        <div class="resumen-badge">✨ IA</div>
+        <div>
+          <h2>Resumen ejecutivo</h2>
+          <p class="resumen-subtitulo">Generado por inteligencia artificial a partir de tu diagnóstico IGO</p>
+        </div>
+      </div>
+
+      <!-- Estado: cargando -->
+      <div id="resumenCargando" style="display:none">
+        <div class="resumen-loading">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+          <p>Analizando tu diagnóstico...</p>
+        </div>
+      </div>
+
+      <!-- Estado: error -->
+      <div class="alert alert-error" id="resumenError" style="display:none"></div>
+
+      <!-- Estado: contenido -->
+      <div id="resumenContenido" style="display:none">
+        <div class="resumen-texto" id="resumenTexto"></div>
+        <div class="resumen-footer">
+          <span class="resumen-disclaimer">
+            Este resumen es orientativo. Las decisiones finales son tuyas.
+          </span>
+          <button class="btn-secondary" id="btnCopiarResumen">📋 Copiar texto</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

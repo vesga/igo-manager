@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu perfil · IGO Manager</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body class="app-body">
+
+  <!-- Navbar de la app (compartida con dashboard, sprint 2 la reutilizará) -->
+  <nav class="app-navbar">
+    <a href="/app/dashboard" class="auth-logo">
+      <div class="brand-icon">I</div>
+      <span class="brand-name">IGO Manager</span>
+    </a>
+    <div class="app-nav-right">
+      <span class="nav-user" id="navUser">···</span>
+      <a href="/logout" class="btn-nav-ghost">Salir</a>
+    </div>
+  </nav>
+
+  <div class="app-container">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Tu perfil</h1>
+        <p class="page-subtitle">
+          Esta información nos ayuda a entender mejor el contexto de tu empresa.
+        </p>
+      </div>
+      <div class="progress-steps">
+        <div class="step step-done">1 · Cuenta</div>
+        <div class="step step-active">2 · Perfil</div>
+        <div class="step">3 · Iniciativas</div>
+      </div>
+    </div>
+
+    <div class="alert alert-success" id="alertSuccess" style="display:none">
+      ✅ Perfil guardado correctamente
+    </div>
+    <div class="alert alert-error" id="alertError" style="display:none"></div>
+
+    <form action="/app/perfil" method="POST" id="formPerfil">
+
+      <!-- ── Sección 1: Sobre ti ─────────────────────────────────────────── -->
+      <div class="card section-card">
+        <div class="section-title">
+          <div class="section-num">01</div>
+          <div>
+            <h2>Sobre ti</h2>
+            <p>Información personal para el análisis demográfico</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="rango_edad">Rango de edad</label>
+            <select id="rango_edad" name="rango_edad">
+              <option value="">Selecciona tu rango</option>
+              <option value="18-25">18 – 25 años</option>
+              <option value="26-35">26 – 35 años</option>
+              <option value="36-45">36 – 45 años</option>
+              <option value="46-55">46 – 55 años</option>
+              <option value="56+">Más de 56 años</option>
+            </select>
+            <span class="form-hint">Usado solo para estadísticas anónimas</span>
+          </div>
+
+          <div class="form-group">
+            <label>Género</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" name="genero" value="Masculino" />
+                <span class="radio-custom"></span>
+                <span>Masculino</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="genero" value="Femenino" />
+                <span class="radio-custom"></span>
+                <span>Femenino</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="genero" value="Otro" />
+                <span class="radio-custom"></span>
+                <span>Otro / Prefiero no decir</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Sección 2: Tu empresa ──────────────────────────────────────── -->
+      <div class="card section-card">
+        <div class="section-title">
+          <div class="section-num">02</div>
+          <div>
+            <h2>Tu empresa</h2>
+            <p>Cuéntanos sobre el negocio que vas a diagnosticar</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="empresa_nombre">Nombre de la empresa *</label>
+          <input
+            type="text" id="empresa_nombre" name="empresa_nombre"
+            placeholder="Ej: Confecciones El Dorado"
+            required
+          />
+          <span class="form-hint">El nombre con el que opera tu negocio</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="sector">Sector económico *</label>
+            <select id="sector" name="sector" required>
+              <option value="">Selecciona un sector</option>
+              <option value="Agropecuario">🌱 Agropecuario</option>
+              <option value="Calzado y Moda">👟 Calzado y Moda</option>
+              <option value="Tecnología">💻 Tecnología</option>
+              <option value="Servicios">🛎️ Servicios</option>
+              <option value="Comercio">🛍️ Comercio</option>
+              <option value="Salud">🏥 Salud</option>
+              <option value="Turismo">✈️ Turismo</option>
+              <option value="Educación">📚 Educación</option>
+              <option value="Otro">⚙️ Otro</option>
+            </select>
+            <span class="form-hint">Elige el que mejor describe tu actividad</span>
+          </div>
+
+          <div class="form-group">
+            <label for="tamano">Tamaño de la empresa *</label>
+            <select id="tamano" name="tamano" required>
+              <option value="">¿En qué etapa estás?</option>
+              <option value="Idea inicial">💡 Idea inicial</option>
+              <option value="Micro">🌱 Micro (hasta 10 empleados)</option>
+              <option value="Pequeña">🌿 Pequeña (11–50 empleados)</option>
+              <option value="Mediana">🌳 Mediana (51–200 empleados)</option>
+              <option value="Grande">🏢 Grande (más de 200)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ubicacion">Ciudad</label>
+          <input
+            type="text" id="ubicacion" name="ubicacion"
+            placeholder="Ej: Bucaramanga"
+          />
+          <span class="form-hint">Ciudad donde opera principalmente tu empresa</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/app/dashboard" class="btn-secondary">Completar después</a>
+        <button type="submit" class="btn-primary">
+          Guardar y continuar →
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    // Pre-cargar datos existentes al abrir la página
+    (async () => {
+      try {
+        const r = await fetch('/app/perfil/datos');
+        const { usuario, empresa } = await r.json();
+
+        if (usuario.rango_edad)
+          document.getElementById('rango_edad').value = usuario.rango_edad;
+
+        if (usuario.genero) {
+          const radio = document.querySelector(`input[name="genero"][value="${usuario.genero}"]`);
+          if (radio) radio.checked = true;
+        }
+
+        if (empresa.nombre)    document.getElementById('empresa_nombre').value = empresa.nombre;
+        if (empresa.sector)    document.getElementById('sector').value          = empresa.sector;
+        if (empresa.tamano)    document.getElementById('tamano').value          = empresa.tamano;
+        if (empresa.ubicacion) document.getElementById('ubicacion').value       = empresa.ubicacion;
+      } catch (_) {
+        // Si falla la carga, el form queda vacío y el usuario completa manual
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+/* public/css/auth.css — Estilos para pantallas de autenticación */
+
+/* ── Layout split ────────────────────────────────────────────────────────── */
+.auth-body { min-height: 100vh; background: var(--bg); }
+
+.auth-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100vh;
+}
+
+/* ── Panel izquierdo (branding) ──────────────────────────────────────────── */
+.auth-aside {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.auth-aside::before {
+  content: '';
+  position: absolute; top: -100px; left: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(ellipse, rgba(124,109,250,.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.auth-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; margin-bottom: auto;
+}
+
+.auth-aside-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 3rem;
+}
+
+/* Matriz en miniatura dentro del aside */
+.matrix-mini {
+  position: relative;
+  width: 220px; height: 160px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 2rem;
+  box-shadow: 0 12px 40px rgba(0,0,0,.4);
+}
+.mq {
+  position: absolute; width: 50%; height: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.mq span { font-size: 8px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; opacity: .7; }
+.mq-tl { top:0;left:0; background:rgba(124,109,250,.15); color:var(--accent2); border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
+.mq-tr { top:0;right:0; background:rgba(34,197,94,.12); color:var(--verde); border-bottom:1px solid var(--border); }
+.mq-bl { bottom:0;left:0; background:rgba(100,116,139,.08); color:#64748b; border-right:1px solid var(--border); }
+.mq-br { bottom:0;right:0; background:rgba(34,211,238,.08); color:var(--cyan); }
+.maxis-h { position:absolute; top:50%; left:0; width:100%; height:1px; background:rgba(255,255,255,.08); }
+.maxis-v { position:absolute; left:50%; top:0; height:100%; width:1px; background:rgba(255,255,255,.08); }
+.mdot { position:absolute; width:8px; height:8px; border-radius:50%; background:var(--accent); transform:translate(-50%,-50%); box-shadow:0 0 6px rgba(124,109,250,.5); animation: pulse 2.5s infinite; }
+.mdot-green  { background:var(--verde);  box-shadow:0 0 6px rgba(34,197,94,.5); }
+.mdot-purple { background:var(--accent); animation-delay: .8s; }
+
+.auth-aside-quote {
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--text); text-align: center;
+  line-height: 1.5; margin-bottom: .5rem;
+}
+.auth-aside-sub {
+  font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.5px;
+}
+
+/* ── Panel derecho (formulario) ──────────────────────────────────────────── */
+.auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-header { margin-bottom: 2rem; }
+.auth-header h1 {
+  font-size: 1.75rem; font-weight: 900;
+  color: var(--text); margin-bottom: .4rem;
+}
+.auth-header p { font-size: .875rem; color: var(--muted); }
+
+/* ── Alertas ─────────────────────────────────────────────────────────────── */
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  border: 1px solid transparent;
+}
+.alert-error {
+  background: rgba(244,63,94,.12);
+  border-color: rgba(244,63,94,.3);
+  color: #fb7185;
+}
+.alert-success {
+  background: rgba(34,197,94,.1);
+  border-color: rgba(34,197,94,.25);
+  color: #4ade80;
+}
+.alert-info {
+  background: rgba(124,109,250,.1);
+  border-color: rgba(124,109,250,.25);
+  color: var(--accent2);
+}
+
+/* ── Botón full width ────────────────────────────────────────────────────── */
+.btn-full {
+  width: 100%;
+  padding: 13px;
+  font-size: 14px;
+  margin-top: .5rem;
+  border-radius: 12px;
+  justify-content: center;
+}
+
+/* ── Input contraseña con toggle ─────────────────────────────────────────── */
+.input-pwd { position: relative; }
+.input-pwd input { padding-right: 44px; }
+.pwd-toggle {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--dim); cursor: pointer;
+  padding: 4px; display: flex;
+  transition: color .2s;
+}
+.pwd-toggle:hover { color: var(--accent); }
+.pwd-toggle svg { width: 16px; height: 16px; }
+
+/* ── Checkbox personalizado (Habeas Data) ────────────────────────────────── */
+.checkbox-label {
+  display: flex; align-items: flex-start; gap: 10px;
+  cursor: pointer; font-size: 12px;
+  color: var(--muted); line-height: 1.55;
+}
+.checkbox-label input[type="checkbox"] { display: none; }
+.checkbox-custom {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 2px;
+  transition: all .2s;
+}
+.checkbox-label input:checked + .checkbox-custom {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.checkbox-label input:checked + .checkbox-custom::after {
+  content: '✓';
+  color: #fff; font-size: 11px; font-weight: 900;
+}
+.error-hint { color: var(--rojo) !important; }
+
+/* ── Radio buttons ───────────────────────────────────────────────────────── */
+.radio-group { display: flex; flex-direction: column; gap: 8px; }
+.radio-label {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; font-size: 13px; color: var(--text);
+}
+.radio-label input[type="radio"] { display: none; }
+.radio-custom {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .2s; flex-shrink: 0;
+}
+.radio-label input:checked + .radio-custom {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,109,250,.2);
+}
+.radio-label input:checked + .radio-custom::after {
+  content: '';
+  width: 7px; height: 7px;
+  background: #fff; border-radius: 50%;
+}
+
+/* ── Links ───────────────────────────────────────────────────────────────── */
+.link-inline {
+  color: var(--accent);
+  text-decoration: none; font-weight: 700;
+}
+.link-inline:hover { text-decoration: underline; }
+
+.auth-switch {
+  text-align: center;
+  font-size: 13px; color: var(--muted);
+  margin-top: 1.25rem;
+}
+
+/* ── Modal Habeas Data ───────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.7);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 1rem;
+}
+.modal-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem; max-width: 480px; width: 100%;
+  position: relative;
+}
+.modal-box h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+.modal-box p  { font-size: 13px; color: var(--muted); margin-bottom: .75rem; line-height: 1.6; }
+.modal-box ul { font-size: 13px; color: var(--muted); padding-left: 1.25rem; margin-bottom: .75rem; }
+.modal-box ul li { margin-bottom: .4rem; line-height: 1.5; }
+.modal-close {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: none; color: var(--muted);
+  font-size: 1.25rem; cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: var(--text); }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .auth-layout { grid-template-columns: 1fr; }
+  .auth-aside   { display: none; }
+  .auth-main    { padding: 2rem 1.25rem; align-items: flex-start; padding-top: 3rem; }
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión · IGO Manager</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-layout">
+
+    <!-- Panel izquierdo: branding -->
+    <aside class="auth-aside">
+      <a href="/" class="auth-logo">
+        <div class="brand-icon">I</div>
+        <span class="brand-name">IGO Manager</span>
+      </a>
+      <div class="auth-aside-content">
+        <div class="matrix-mini" aria-hidden="true">
+          <div class="mq mq-tl"><span>Estratégico</span></div>
+          <div class="mq mq-tr"><span>¡Hacer Ya!</span></div>
+          <div class="mq mq-bl"><span>Descarte</span></div>
+          <div class="mq mq-br"><span>Rutina</span></div>
+          <div class="maxis-h"></div>
+          <div class="maxis-v"></div>
+          <div class="mdot" style="top:25%;left:65%"></div>
+          <div class="mdot mdot-green" style="top:32%;left:72%"></div>
+          <div class="mdot mdot-purple" style="top:20%;left:30%"></div>
+        </div>
+        <p class="auth-aside-quote">
+          "Claridad primero,<br/>acción después."
+        </p>
+        <p class="auth-aside-sub">Metodología IGO · Dinámica del Oriente</p>
+      </div>
+    </aside>
+
+    <!-- Panel derecho: formulario -->
+    <main class="auth-main">
+      <div class="auth-card">
+
+        <div class="auth-header">
+          <h1>Bienvenido de vuelta</h1>
+          <p>Ingresa para continuar con tu diagnóstico</p>
+        </div>
+
+        <div class="alert alert-error" id="alertError" style="display:none"></div>
+
+        <form id="formLogin" action="/login" method="POST" novalidate>
+
+          <div class="form-group">
+            <label for="correo">Correo electrónico</label>
+            <input
+              type="email" id="correo" name="correo"
+              placeholder="hola@empresa.com"
+              autocomplete="email" required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="contrasena">Contraseña</label>
+            <div class="input-pwd">
+              <input
+                type="password" id="contrasena" name="contrasena"
+                placeholder="Tu contraseña"
+                autocomplete="current-password" required
+              />
+              <button type="button" class="pwd-toggle" aria-label="Mostrar contraseña">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary btn-full" id="btnLogin">
+            Ingresar →
+          </button>
+
+        </form>
+
+        <p class="auth-switch">
+          ¿No tienes cuenta?
+          <a href="/registro" class="link-inline">Regístrate gratis</a>
+        </p>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="/js/auth.js"></script>
+</body>
+</html>

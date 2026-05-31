@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crear cuenta · IGO Manager</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-layout">
+
+    <!-- Panel izquierdo: branding -->
+    <aside class="auth-aside">
+      <a href="/" class="auth-logo">
+        <div class="brand-icon">I</div>
+        <span class="brand-name">IGO Manager</span>
+      </a>
+      <div class="auth-aside-content">
+        <div class="matrix-mini" aria-hidden="true">
+          <div class="mq mq-tl"><span>Estratégico</span></div>
+          <div class="mq mq-tr"><span>¡Hacer Ya!</span></div>
+          <div class="mq mq-bl"><span>Descarte</span></div>
+          <div class="mq mq-br"><span>Rutina</span></div>
+          <div class="maxis-h"></div>
+          <div class="maxis-v"></div>
+          <div class="mdot" style="top:25%;left:65%"></div>
+          <div class="mdot mdot-green" style="top:32%;left:72%"></div>
+          <div class="mdot mdot-purple" style="top:20%;left:30%"></div>
+        </div>
+        <p class="auth-aside-quote">
+          "Saber qué hacer primero<br/>es la mitad del éxito."
+        </p>
+        <p class="auth-aside-sub">Metodología IGO · Dinámica del Oriente</p>
+      </div>
+    </aside>
+
+    <!-- Panel derecho: formulario -->
+    <main class="auth-main">
+      <div class="auth-card">
+
+        <div class="auth-header">
+          <h1>Crea tu cuenta</h1>
+          <p>Empieza a priorizar tu negocio hoy</p>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div class="alert alert-error" id="alertError" style="display:none"></div>
+
+        <form id="formRegistro" action="/registro" method="POST" novalidate>
+
+          <div class="form-group">
+            <label for="nombre">Tu nombre completo</label>
+            <input
+              type="text" id="nombre" name="nombre"
+              placeholder="Ej: Ana García"
+              autocomplete="name" required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="correo">Correo electrónico</label>
+            <input
+              type="email" id="correo" name="correo"
+              placeholder="hola@empresa.com"
+              autocomplete="email" required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="contrasena">Contraseña</label>
+            <div class="input-pwd">
+              <input
+                type="password" id="contrasena" name="contrasena"
+                placeholder="Mínimo 8 caracteres"
+                autocomplete="new-password" required minlength="8"
+              />
+              <button type="button" class="pwd-toggle" aria-label="Mostrar contraseña">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <span class="form-hint">Al menos 8 caracteres</span>
+          </div>
+
+          <!-- Habeas Data (RF-04) — obligatorio -->
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="habeas_data" name="habeas_data" value="1" required />
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">
+                Acepto la
+                <a href="#" class="link-inline" id="linkHabeas">política de tratamiento de datos personales</a>
+                (Ley 1581/2012 · Habeas Data)
+              </span>
+            </label>
+            <span class="form-hint error-hint" id="habeasError" style="display:none">
+              Debes aceptar la política de datos para continuar.
+            </span>
+          </div>
+
+          <button type="submit" class="btn-primary btn-full" id="btnRegistro">
+            Crear cuenta →
+          </button>
+
+        </form>
+
+        <p class="auth-switch">
+          ¿Ya tienes cuenta?
+          <a href="/login" class="link-inline">Inicia sesión</a>
+        </p>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Modal Habeas Data -->
+  <div class="modal-overlay" id="modalHabeas" style="display:none">
+    <div class="modal-box">
+      <button class="modal-close" id="btnCerrarModal">&times;</button>
+      <h2>Política de Tratamiento de Datos</h2>
+      <p><strong>Responsable:</strong> Dinámica del Oriente S.A.S.</p>
+      <p>
+        De acuerdo con la Ley 1581 de 2012 y el Decreto 1377 de 2013, al registrarte
+        autorizas a Dinámica del Oriente S.A.S. a recolectar y tratar tus datos personales
+        con las siguientes finalidades:
+      </p>
+      <ul>
+        <li>Prestación del servicio de diagnóstico empresarial IGO.</li>
+        <li>Generación de estadísticas agregadas y anónimas del tejido empresarial regional.</li>
+        <li>Comunicaciones relacionadas con el servicio.</li>
+      </ul>
+      <p>
+        Tus datos no serán vendidos ni cedidos a terceros con fines comerciales.
+        Puedes ejercer tus derechos de acceso, corrección y supresión escribiendo a
+        <strong>datos@dinamicadeloriente.com</strong>.
+      </p>
+      <button class="btn-primary" id="btnAceptarHabeas">Entendido, acepto</button>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+</body>
+</html>
