@@ -1,0 +1,161 @@
+/* public/css/plan.css — Estilos del plan de acción */
+
+/* ── Barra de progreso ───────────────────────────────────────────────────── */
+.progress-card { margin-bottom: 1.25rem; padding: 1.25rem 1.5rem; }
+.progress-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: .6rem;
+}
+.progress-label { font-size: 13px; font-weight: 700; color: var(--text); }
+.progress-pct   { font-size: 1.2rem; font-weight: 900; color: var(--accent2); }
+.progress-bar-bg {
+  height: 8px; border-radius: 20px;
+  background: var(--surface2); overflow: hidden;
+  border: 1px solid var(--border);
+}
+.progress-bar-fill {
+  height: 100%; border-radius: 20px;
+  background: linear-gradient(90deg, var(--accent), var(--verde));
+  transition: width .5s ease;
+}
+.progress-stats { font-size: 11px; color: var(--dim); margin-top: .4rem; }
+
+/* ── Filtros ─────────────────────────────────────────────────────────────── */
+.filtros {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.filtro-btn {
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  border: 1px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all .18s;
+}
+.filtro-btn:hover  { border-color: var(--accent); color: var(--accent2); }
+.filtro-activo     { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Tarjeta de tarea ────────────────────────────────────────────────────── */
+.tarea-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: .75rem;
+  transition: border-color .2s;
+}
+.tarea-card:hover { border-color: rgba(124,109,250,.3); }
+
+.tarea-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 10px;
+  margin-bottom: .5rem;
+}
+.tarea-desc {
+  font-size: .875rem; font-weight: 700;
+  color: var(--text); line-height: 1.45;
+}
+.tarea-ini {
+  font-size: 11px; color: var(--muted);
+  margin-bottom: .6rem;
+}
+.tarea-ini span {
+  color: var(--accent2); font-weight: 700;
+}
+
+/* Estado pill */
+.estado-pill {
+  font-size: 9px; font-weight: 900;
+  letter-spacing: .5px; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.estado-Pendiente  { background:rgba(250,196,0,.12); color:#fac400;   border:1px solid rgba(250,196,0,.3);   }
+.estado-En_proceso { background:rgba(34,211,238,.1); color:var(--cyan);border:1px solid rgba(34,211,238,.25); }
+.estado-Terminado  { background:rgba(34,197,94,.12); color:var(--verde);border:1px solid rgba(34,197,94,.3); }
+.estado-Abortado   { background:rgba(244,63,94,.1);  color:#fb7185;   border:1px solid rgba(244,63,94,.25);  }
+
+/* Meta-datos de la tarea */
+.tarea-meta {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: .75rem;
+}
+.meta-chip {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px; padding: 3px 8px;
+}
+
+/* Selector de estado inline */
+.estado-select {
+  font-size: 11px; font-weight: 700;
+  background: var(--surface2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 4px 8px; cursor: pointer;
+  transition: border-color .2s;
+}
+.estado-select:focus { outline: none; border-color: var(--accent); }
+
+/* Acciones */
+.tarea-actions { display: flex; gap: 6px; margin-top: .6rem; }
+.btn-tarea {
+  padding: 5px 12px; font-size: 11px; font-weight: 700;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted);
+  cursor: pointer; transition: all .18s;
+}
+.btn-tarea:hover      { color: var(--text); border-color: var(--accent); }
+.btn-tarea-del:hover  { color: var(--rojo); border-color: var(--rojo); background: rgba(244,63,94,.06); }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .tarea-meta { gap: 5px; }
+}
+
+/* ── Tarjetas de sugerencia IA ───────────────────────────────────────────── */
+.sugerencia-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .875rem 1rem;
+  margin-bottom: .625rem;
+  transition: border-color .2s;
+}
+.sugerencia-card:hover { border-color: rgba(124,109,250,.35); }
+
+.sug-desc {
+  font-size: 13px; font-weight: 700;
+  color: var(--text); margin-bottom: .5rem;
+  line-height: 1.4;
+}
+.sug-meta {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: .625rem;
+}
+.sug-chip {
+  font-size: 10px; color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 8px;
+}
+.btn-agregar-sug {
+  width: 100%; padding: 7px;
+  font-size: 12px; font-weight: 700;
+  border-radius: 8px; border: 1px solid rgba(124,109,250,.3);
+  background: rgba(124,109,250,.1); color: var(--accent2);
+  cursor: pointer; transition: all .2s;
+}
+.btn-agregar-sug:hover {
+  background: rgba(124,109,250,.2);
+  border-color: var(--accent);
+}
+.btn-agregar-sug:disabled {
+  opacity: .5; cursor: not-allowed;
+}
+.btn-agregar-sug.agregada {
+  background: rgba(34,197,94,.1);
+  border-color: rgba(34,197,94,.3);
+  color: var(--verde);
+}

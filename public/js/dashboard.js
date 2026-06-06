@@ -5,6 +5,34 @@
 (function () {
   'use strict';
 
+  // ── Modal de confirmación (reemplaza confirm() nativo) ────────────────────
+  let _confirmCallback = null;
+
+  function mostrarConfirmar(mensaje, onAceptar) {
+    document.getElementById('confirmarMensaje').textContent = mensaje;
+    _confirmCallback = onAceptar;
+    document.getElementById('modalConfirmar').style.display = 'flex';
+  }
+
+  document.getElementById('btnCancelarConfirmar').addEventListener('click', () => {
+    document.getElementById('modalConfirmar').style.display = 'none';
+    _confirmCallback = null;
+  });
+
+  document.getElementById('btnAceptarConfirmar').addEventListener('click', () => {
+    document.getElementById('modalConfirmar').style.display = 'none';
+    if (_confirmCallback) _confirmCallback();
+    _confirmCallback = null;
+  });
+
+  document.getElementById('modalConfirmar').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalConfirmar')) {
+      document.getElementById('modalConfirmar').style.display = 'none';
+      _confirmCallback = null;
+    }
+  });
+
+
   // ── Estado global de la página ────────────────────────────────────────────
   // Guardamos los datos en memoria para no recargar la página con cada cambio.
   let estado = {
@@ -423,16 +451,21 @@
 
   // ── Eliminar ──────────────────────────────────────────────────────────────
 
-  window.eliminar = async function (id) {
+  window.eliminar = function (id) {
     const ini = estado.iniciativas.find(i => i.id === id);
-    if (!confirm(`¿Eliminar "${ini?.titulo}"? Esta acción no se puede deshacer.`)) return;
-    try {
-      await api('DELETE', `/api/iniciativas/${id}`);
-      mostrarAlerta('ok', 'Iniciativa eliminada');
-      await cargarIniciativas();
-    } catch (err) {
-      mostrarAlerta('error', err.message);
-    }
+    if (!ini) return;
+    mostrarConfirmar(
+      `¿Eliminar la iniciativa "${ini.titulo}"? Esta acción no se puede deshacer.`,
+      async () => {
+        try {
+          await api('DELETE', `/api/iniciativas/${id}`);
+          mostrarAlerta('ok', 'Iniciativa eliminada');
+          await cargarIniciativas();
+        } catch (err) {
+          mostrarAlerta('error', err.message);
+        }
+      }
+    );
   };
 
   // ── Sliders: fill y valor en tiempo real ──────────────────────────────────
@@ -478,13 +511,133 @@
   // Nombre del usuario en el nav
   fetch('/api/sesion').then(r => r.json()).then(s => {
     document.getElementById('navUser').textContent        = s.nombre;
-    document.getElementById('titleBienvenida').textContent = `Hola, ${s.nombre.split(' ')[0]} 👋`;
+    document.getElementById('titleBienvenida').textContent = `Bienvenido, ${s.nombre.split(' ')[0]}`;
   });
 
   // ── Arranque ──────────────────────────────────────────────────────────────
+  verificarPremium();
   cargarIniciativas();
 
-  // ── Resumen Ejecutivo IA ──────────────────────────────────────────────────
+  // ── Sistema Premium + Resumen Ejecutivo IA ──────────────────────────────────
+  // Flujo:
+  //   1. Al cargar la página se verifica si el usuario ya es premium
+  //   2. Si no es premium: clic en botón → modal de código
+  //   3. Si ingresa el código correcto → se desbloquea y puede generar resumen
+  //   4. Si ya es premium: clic en botón → directo al resumen
+
+  let usuarioEsPremium = false;
+
+  // Verificar estado premium al cargar
+  async function verificarPremium() {
+    try {
+      const r    = await fetch('/api/premium/estado');
+      const data = await r.json();
+      usuarioEsPremium = data.esPremium;
+      actualizarBotoнPremium();
+    } catch (_) { /* si falla, asume no premium */ }
+  }
+
+  function actualizarBotoнPremium() {
+    const btn  = document.getElementById('btnResumen');
+    const lock = document.getElementById('lockIcon');
+    if (usuarioEsPremium) {
+      btn.classList.add('desbloqueado');
+      lock.textContent = '·';
+    } else {
+      btn.classList.remove('desbloqueado');
+      lock.textContent = 'Premium';
+    }
+  }
+
+  // ── Modal premium (código de acceso) ─────────────────────────────────────
+
+  const modalPremium     = document.getElementById('modalPremium');
+  const inputCodigo      = document.getElementById('inputCodigo');
+  const premiumErrorEl   = document.getElementById('premiumError');
+  const premiumSuccessEl = document.getElementById('premiumSuccess');
+
+  function abrirModalPremium() {
+    inputCodigo.value              = '';
+    premiumErrorEl.style.display   = 'none';
+    premiumSuccessEl.style.display = 'none';
+    modalPremium.style.display     = 'flex';
+    setTimeout(() => inputCodigo.focus(), 100);
+  }
+
+  function cerrarModalPremium() {
+    modalPremium.style.display = 'none';
+  }
+
+  async function activarPremium() {
+    const codigo = inputCodigo.value.trim();
+    if (!codigo) {
+      premiumErrorEl.textContent  = 'Escribe el código de acceso.';
+      premiumErrorEl.style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('btnActivarPremium');
+    btn.textContent = 'Verificando...';
+    btn.disabled    = true;
+    premiumErrorEl.style.display = 'none';
+
+    try {
+      const r    = await fetch('/api/premium/activar', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ codigo }),
+      });
+      const data = await r.json();
+
+      if (!r.ok) throw new Error(data.error);
+
+      // Éxito: mostrar mensaje y luego abrir el resumen
+      premiumSuccessEl.textContent  = '¡Acceso activado! Abriendo el resumen...';
+      premiumSuccessEl.style.display = 'block';
+      usuarioEsPremium = true;
+      actualizarBotoнPremium();
+
+      setTimeout(() => {
+        cerrarModalPremium();
+        abrirModalResumen();
+      }, 1400);
+
+    } catch (err) {
+      premiumErrorEl.textContent  = err.message;
+      premiumErrorEl.style.display = 'block';
+    } finally {
+      btn.textContent = 'Activar acceso →';
+      btn.disabled    = false;
+    }
+  }
+
+  document.getElementById('btnActivarPremium').addEventListener('click', activarPremium);
+  document.getElementById('btnCancelarPremium').addEventListener('click', cerrarModalPremium);
+  document.getElementById('btnCerrarPremium').addEventListener('click',   cerrarModalPremium);
+  modalPremium.addEventListener('click', e => {
+    if (e.target === modalPremium) cerrarModalPremium();
+  });
+  inputCodigo.addEventListener('keydown', e => {
+    if (e.key === 'Enter') activarPremium();
+  });
+  // Forzar mayúsculas mientras el usuario escribe
+  inputCodigo.addEventListener('input', () => {
+    const pos = inputCodigo.selectionStart;
+    inputCodigo.value = inputCodigo.value.toUpperCase();
+    inputCodigo.setSelectionRange(pos, pos);
+  });
+
+  // ── Al pulsar el botón principal ─────────────────────────────────────────
+
+  document.getElementById('btnResumen').addEventListener('click', () => {
+    if (usuarioEsPremium) {
+      abrirModalResumen();   // ya tiene acceso → resumen directo
+    } else {
+      abrirModalPremium();   // pedir código primero
+    }
+  });
+
+  // ── Modal resumen ejecutivo IA ────────────────────────────────────────────
 
   const modalResumen    = document.getElementById('modalResumen');
   const resumenCargando = document.getElementById('resumenCargando');
@@ -550,12 +703,12 @@
     const texto = resumenTextoEl.innerText;
     navigator.clipboard.writeText(texto).then(() => {
       const btn = document.getElementById('btnCopiarResumen');
-      btn.textContent = '✅ Copiado';
-      setTimeout(() => { btn.textContent = '📋 Copiar texto'; }, 2000);
+      btn.textContent = 'Copiado';
+      setTimeout(() => { btn.textContent = 'Copiar texto'; }, 2000);
     });
   });
 
-  document.getElementById('btnResumen').addEventListener('click',       abrirModalResumen);
+  // (el listener del botón btnResumen está arriba en el bloque premium)
   document.getElementById('btnCerrarResumen').addEventListener('click', cerrarModalResumen);
   modalResumen.addEventListener('click', e => {
     if (e.target === modalResumen) cerrarModalResumen();

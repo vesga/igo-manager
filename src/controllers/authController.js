@@ -86,7 +86,7 @@ exports.procesarLogin = async (req, res) => {
   try {
     // 1. Buscar el usuario por correo
     const [filas] = await pool.execute(
-      'SELECT id, nombre, contrasena_hash FROM usuario WHERE correo = ?',
+      'SELECT id, nombre, contrasena_hash, rol FROM usuario WHERE correo = ?',
       [correo.toLowerCase().trim()]
     );
 
@@ -106,8 +106,11 @@ exports.procesarLogin = async (req, res) => {
     // 4. Guardar en sesión y redirigir
     req.session.usuarioId     = usuario.id;
     req.session.usuarioNombre = usuario.nombre;
+    req.session.rol           = usuario.rol;  // 'usuario' o 'admin'
 
-    res.redirect('/app/dashboard');
+    // Admin va al panel, usuario normal al dashboard
+    const destino = usuario.rol === 'admin' ? '/admin' : '/app/dashboard';
+    res.redirect(destino);
 
   } catch (err) {
     console.error('Error en procesarLogin:', err);

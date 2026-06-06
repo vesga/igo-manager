@@ -1,6 +1,7 @@
 // src/controllers/resumenController.js
-// Genera un resumen ejecutivo del diagnóstico IGO usando Google Gemini API (gratuita).
-// Documentación: https://ai.google.dev/gemini-api/docs
+// Genera un resumen ejecutivo usando Groq API — 100% gratuita, sin tarjeta.
+// Modelo: llama3-8b-8192 (Meta LLaMA 3, muy bueno para texto en español)
+// Límite gratuito: 14,400 requests/día — más que suficiente.
 
 const pool     = require('../config/db');
 const motorIGO = require('../services/motorIGO');
@@ -14,6 +15,20 @@ const ETIQUETAS = {
 
 exports.generar = async (req, res) => {
   const usuarioId = req.session.usuarioId;
+
+  // Verificar acceso premium
+  if (!req.session.esPremium) {
+    const [filas] = await pool.execute(
+      'SELECT es_premium FROM usuario WHERE id = ?', [usuarioId]
+    );
+    if (!filas[0]?.es_premium) {
+      return res.status(403).json({
+        error: 'Esta función es exclusiva para usuarios premium.',
+        requierePremium: true
+      });
+    }
+    req.session.esPremium = true;
+  }
 
   try {
     const [usuarios] = await pool.execute(
@@ -39,14 +54,14 @@ exports.generar = async (req, res) => {
 
     const empresa       = empresas[0] || {};
     const usuario       = usuarios[0] || {};
-    const nombreEmpresa = empresa.nombre   || 'la empresa';
-    const sector        = empresa.sector   || 'no especificado';
-    const tamano        = empresa.tamano   || 'no especificado';
+    const nombreEmpresa = empresa.nombre    || 'la empresa';
+    const sector        = empresa.sector    || 'no especificado';
+    const tamano        = empresa.tamano    || 'no especificado';
     const ubicacion     = empresa.ubicacion || 'no especificada';
 
-    const listaIniciativas = calificadas.map((ini, i) => {
-      return `${i + 1}. "${ini.titulo}" — Importancia: ${ini.importancia}/10, Gobernabilidad: ${ini.gobernabilidad}/10 → Cuadrante: ${ETIQUETAS[ini.cuadrante]}`;
-    }).join('\n');
+    const listaIniciativas = calificadas.map((ini, i) =>
+      `${i + 1}. "${ini.titulo}" — Importancia: ${ini.importancia}/10, Gobernabilidad: ${ini.gobernabilidad}/10 → Cuadrante: ${ETIQUETAS[ini.cuadrante]}`
+    ).join('\n');
 
     const sinCalificar = iniciativas
       .filter(i => !i.cuadrante)
@@ -55,7 +70,7 @@ exports.generar = async (req, res) => {
 
     const prompt = `Eres un consultor de negocios experto en la metodología IGO (Importancia vs. Gobernabilidad) de Dinámica del Oriente S.A.S.
 
-Se te pide generar un RESUMEN EJECUTIVO del diagnóstico IGO de un empresario. Tu rol es interpretar los resultados que él mismo generó — tú no calificas ni cambias los valores, solo los interpretas con criterio experto.
+Genera un RESUMEN EJECUTIVO del diagnóstico IGO de este empresario. Interpreta los resultados que él mismo generó — no cambies los valores, solo analízalos con criterio experto.
 
 DATOS DEL NEGOCIO:
 - Empresa: ${nombreEmpresa}
@@ -65,64 +80,62 @@ DATOS DEL NEGOCIO:
 - Empresario: ${usuario.nombre || 'no especificado'}
 
 METODOLOGÍA IGO:
-- Eje Y = Importancia (qué tan crítica es la iniciativa para el negocio)
-- Eje X = Gobernabilidad (capacidad actual de la empresa para ejecutarla)
-- Divisoria Y (promedio Importancia): ${promedioI.toFixed(1)}
-- Divisoria X (promedio Gobernabilidad): ${promedioG.toFixed(1)}
-- Cuadrantes:
-  • ¡Hacer Ya! = alta importancia + alta gobernabilidad → ejecutar de inmediato
-  • Estratégico = alta importancia + baja gobernabilidad → buscar recursos o aliados
-  • Rutina = baja importancia + alta gobernabilidad → delegar o automatizar
-  • Descarte = baja importancia + baja gobernabilidad → no invertir energía ahora
+- Eje Y = Importancia | Eje X = Gobernabilidad
+- Promedio Importancia (divisoria Y): ${promedioI.toFixed(1)}
+- Promedio Gobernabilidad (divisoria X): ${promedioG.toFixed(1)}
+- ¡Hacer Ya! = imp alta + gob alta → ejecutar de inmediato
+- Estratégico = imp alta + gob baja → buscar recursos o aliados
+- Rutina = imp baja + gob alta → delegar o automatizar
+- Descarte = imp baja + gob baja → no invertir energía ahora
 
 INICIATIVAS CALIFICADAS:
 ${listaIniciativas}
-${sinCalificar ? `\nINICIATIVAS PENDIENTES DE CALIFICAR: ${sinCalificar}` : ''}
+${sinCalificar ? `\nINICIATIVAS SIN CALIFICAR: ${sinCalificar}` : ''}
 
-INSTRUCCIONES PARA EL RESUMEN:
-Escribe un resumen ejecutivo profesional pero cercano, en español, dirigido directamente al empresario (tutéalo). Estructura el resumen así:
+Escribe el resumen en español, tutéalo al empresario, profesional pero cercano. Estructura:
+1. **Panorama general** (2-3 oraciones sobre el estado del negocio)
+2. **Prioridades inmediatas** (cuadrante ¡Hacer Ya! — recomendación concreta por cada una)
+3. **Agenda estratégica** (cuadrante Estratégico — qué recursos o alianzas necesita)
+4. **Lo que puedes delegar** (cuadrante Rutina)
+5. **Lo que puedes dejar en pausa** (cuadrante Descarte)
+6. **Mensaje final** (1-2 oraciones motivadoras pero realistas)
 
-1. **Panorama general** (2-3 oraciones): describe en qué estado está el negocio según los resultados.
-2. **Prioridades inmediatas** (cuadrante ¡Hacer Ya!): por qué son urgentes y una recomendación concreta para cada una.
-3. **Agenda estratégica** (cuadrante Estratégico): qué recursos, alianzas o capacidades necesita desarrollar.
-4. **Lo que puedes delegar** (cuadrante Rutina): cómo liberar energía de estas iniciativas.
-5. **Lo que puedes dejar en pausa** (cuadrante Descarte): por qué es válido no atenderlas ahora.
-6. **Mensaje final** (1-2 oraciones de cierre motivador pero realista).
+Omite secciones de cuadrantes vacíos. Máximo 400 palabras. Sin jerga técnica.`;
 
-Si algún cuadrante no tiene iniciativas, omite esa sección sin mencionarla.
-Usa lenguaje claro, sin jerga técnica innecesaria. Máximo 400 palabras.`;
-
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       return res.status(500).json({
-        error: 'La API key de Gemini no está configurada. Agrega GEMINI_API_KEY en tu archivo .env'
+        error: 'Falta configurar GROQ_API_KEY en el archivo .env'
       });
     }
 
-    // Gemini 1.5 Flash — gratuito hasta 1500 requests/día
-const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-    const respuesta = await fetch(url, {
+    // Groq usa el mismo formato de API que OpenAI
+    const respuesta = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          maxOutputTokens: 1024,
-          temperature:     0.7,
-        },
+        model:      'llama-3.1-8b-instant',// LLaMA 3 — gratis en Groq
+        max_tokens:  1024,
+        temperature: 0.7,
+        messages: [
+          { role: 'user', content: prompt }
+        ],
       }),
     });
 
     if (!respuesta.ok) {
       const errBody = await respuesta.text();
-      console.error('Error Gemini API:', errBody);
+      console.error('Error Groq API:', errBody);
       return res.status(502).json({
-        error: 'Error al conectar con Gemini. Revisa tu API key en Google AI Studio.'
+        error: 'Error al conectar con el servicio de IA. Revisa tu GROQ_API_KEY en el .env'
       });
     }
 
     const datos   = await respuesta.json();
-    const resumen = datos.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const resumen = datos.choices?.[0]?.message?.content || '';
 
     res.json({ resumen, promedioI, promedioG });
 

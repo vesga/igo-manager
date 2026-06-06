@@ -406,3 +406,81 @@
   color: var(--dim);
   font-style: italic;
 }
+
+/* ── Botón y modal Premium ───────────────────────────────────────────────── */
+.btn-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid #c9a84c;
+  background: linear-gradient(135deg, #1a1400, #2a2000);
+  color: #f0d080;
+  box-shadow: 0 0 18px rgba(201,168,76,.2), inset 0 1px 0 rgba(240,208,128,.1);
+  transition: all .25s;
+  letter-spacing: .3px;
+}
+.btn-premium:hover {
+  background: linear-gradient(135deg, #2a2000, #3a2e00);
+  border-color: #f0d080;
+  box-shadow: 0 0 32px rgba(201,168,76,.4), inset 0 1px 0 rgba(240,208,128,.2);
+  color: #fff8dc;
+  transform: translateY(-1px);
+}
+.btn-premium.desbloqueado {
+  border-color: #c9a84c;
+  background: linear-gradient(135deg, #0f0d06, #1e1800);
+  color: #c9a84c;
+}
+.btn-premium.desbloqueado:hover {
+  border-color: #f0d080;
+  color: #f0d080;
+  box-shadow: 0 0 28px rgba(201,168,76,.3);
+}
+.lock-icon {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #c9a84c, #f0d080);
+  color: #1a1400;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+
+/* Header del modal premium */
+.premium-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.premium-crown {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.premium-header h2 { font-size: 1.1rem; font-weight: 900; margin-bottom: .2rem; }
+
+/* Lista de beneficios */
+.premium-beneficios {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.beneficio {
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+}

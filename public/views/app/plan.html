@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan de acción · IGO Manager</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="stylesheet" href="/css/plan.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body class="app-body">
+
+  <nav class="app-navbar">
+    <a href="/app/dashboard" class="auth-logo">
+      <div class="brand-icon">I</div>
+      <span class="brand-name">IGO Manager</span>
+    </a>
+    <div class="app-nav-right">
+      <span class="nav-user" id="navUser">···</span>
+      <a href="/app/plan"      class="btn-nav-ghost" style="color:var(--accent2)">Plan de acción</a>
+      <a href="/app/dashboard" class="btn-nav-ghost">Matriz IGO</a>
+      <a href="/app/perfil"    class="btn-nav-ghost">Perfil</a>
+      <a href="/logout"        class="btn-nav-ghost">Salir</a>
+    </div>
+  </nav>
+
+  <div class="app-container" style="max-width:860px">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Plan de acción</h1>
+        <p class="page-subtitle">Convierte tus iniciativas prioritarias en tareas con seguimiento.</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-premium" id="btnSugerirIA">Sugerir tareas con IA</button>
+        <button class="btn-primary" id="btnNuevaTarea">+ Nueva tarea</button>
+      </div>
+    </div>
+
+    <div class="card progress-card" id="progressCard">
+      <div class="progress-header">
+        <span class="progress-label">Progreso del plan</span>
+        <span class="progress-pct" id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-stats">
+        <span id="progressStats">0 de 0 tareas completadas</span>
+      </div>
+    </div>
+
+    <div class="alert alert-error"   id="alertError"   style="display:none"></div>
+    <div class="alert alert-success" id="alertSuccess" style="display:none"></div>
+
+    <div class="filtros">
+      <button class="filtro-btn filtro-activo" data-estado="">Todas</button>
+      <button class="filtro-btn" data-estado="Pendiente">Pendiente</button>
+      <button class="filtro-btn" data-estado="En proceso">En proceso</button>
+      <button class="filtro-btn" data-estado="Terminado">Terminado</button>
+      <button class="filtro-btn" data-estado="Abortado">Abortado</button>
+    </div>
+
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-icon-text">Plan</div>
+      <p>Aún no tienes tareas.<br/>Crea una a partir de tus iniciativas prioritarias.</p>
+    </div>
+
+    <div id="listaTareas"></div>
+  </div>
+
+  <!-- Modal: crear / editar tarea -->
+  <div class="modal-overlay" id="modalTarea" style="display:none">
+    <div class="modal-box modal-wide">
+      <button class="modal-close" id="btnCerrarModal">&times;</button>
+      <h2 id="modalTitulo">Nueva tarea</h2>
+
+      <div class="form-group">
+        <label for="selectIniciativa">Iniciativa relacionada *</label>
+        <select id="selectIniciativa" required>
+          <option value="">Selecciona una iniciativa...</option>
+        </select>
+        <span class="form-hint">Solo se muestran iniciativas calificadas</span>
+      </div>
+
+      <div class="form-group">
+        <label for="inputDesc">Descripción de la tarea *</label>
+        <textarea id="inputDesc" rows="3" placeholder="¿Qué hay que hacer exactamente?"></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="inputFecha">Fecha límite</label>
+          <input type="date" id="inputFecha" />
+        </div>
+        <div class="form-group">
+          <label for="inputPresupuesto">Presupuesto (opcional)</label>
+          <input type="number" id="inputPresupuesto" placeholder="Ej: 500000" min="0" step="1000" />
+          <span class="form-hint">En pesos colombianos</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="inputResponsable">Responsable</label>
+        <input type="text" id="inputResponsable" placeholder="Ej: Juan Pérez o área de ventas" />
+      </div>
+
+      <input type="hidden" id="modalIdTarea" value="" />
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarModal">Cancelar</button>
+        <button class="btn-primary"   id="btnGuardarModal">Guardar tarea</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Sugerir tareas con IA -->
+  <div class="modal-overlay" id="modalSugerir" style="display:none">
+    <div class="modal-box modal-wide" style="max-height:85vh;overflow-y:auto">
+      <button class="modal-close" id="btnCerrarSugerir">&times;</button>
+      <div class="resumen-header">
+        <div class="resumen-badge">IA</div>
+        <div>
+          <h2>Sugerir tareas con IA</h2>
+          <p class="resumen-subtitulo">Selecciona una iniciativa y la IA propone tareas concretas</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="selectSugerirIni">Iniciativa</label>
+        <select id="selectSugerirIni">
+          <option value="">Selecciona una iniciativa calificada...</option>
+        </select>
+      </div>
+
+      <button class="btn-primary btn-full" id="btnGenerarSugerencias">
+        Generar sugerencias →
+      </button>
+
+      <div id="sugerirCargando" style="display:none">
+        <div class="resumen-loading">
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+          <p>Analizando la iniciativa...</p>
+        </div>
+      </div>
+
+      <div class="alert alert-error" id="sugerirError" style="display:none"></div>
+
+      <div id="sugerirResultados" style="display:none">
+        <p class="modal-intro" id="sugerirIntro"></p>
+        <div id="listaSugerencias"></div>
+        <p style="font-size:11px;color:var(--dim);margin-top:.75rem;font-style:italic">
+          Las sugerencias son orientativas. Edítalas a tu gusto antes de agregar.
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Premium requerido -->
+  <div class="modal-overlay" id="modalPremiumPlan" style="display:none">
+    <div class="modal-box modal-wide">
+      <button class="modal-close" id="btnCerrarPremiumPlan">&times;</button>
+      <div class="premium-header">
+        <div class="premium-crown-text">Premium</div>
+        <div>
+          <h2>Función Premium</h2>
+          <p class="resumen-subtitulo">Esta función es exclusiva para usuarios con acceso premium.</p>
+        </div>
+      </div>
+      <div class="premium-beneficios">
+        <div class="beneficio">Sugerencias de tareas generadas por IA</div>
+        <div class="beneficio">Resumen ejecutivo de tu diagnóstico IGO</div>
+        <div class="beneficio">Análisis personalizado por cuadrante</div>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:1rem;text-align:center">
+        Activa tu acceso desde el Dashboard ingresando tu código premium.
+      </p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarPremiumPlan">Ahora no</button>
+        <button class="btn-primary"   id="btnIrDashboard">Ir al Dashboard →</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Confirmar eliminación tarea -->
+  <div class="modal-overlay" id="modalConfirmarTarea" style="display:none">
+    <div class="modal-box" style="max-width:420px">
+      <h2 style="font-size:1rem;margin-bottom:.5rem">Eliminar tarea</h2>
+      <p id="confirmarTareaMensaje" style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6"></p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarConfirmarTarea">Cancelar</button>
+        <button class="btn-primary" id="btnAceptarConfirmarTarea"
+          style="background:#c0392b;border-color:#c0392b">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/plan.js"></script>
+</body>
+</html>

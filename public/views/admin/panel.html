@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin · IGO Manager</title>
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="app-body">
+
+  <nav class="app-navbar">
+    <a href="/admin" class="auth-logo">
+      <div class="brand-icon">I</div>
+      <span class="brand-name">IGO Manager <span class="admin-tag">Admin</span></span>
+    </a>
+    <div class="app-nav-right">
+      <span class="nav-user" id="navUser">···</span>
+      <a href="/logout" class="btn-nav-ghost">Salir</a>
+    </div>
+  </nav>
+
+  <div class="app-container" style="max-width:1100px">
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Panel administrativo</h1>
+        <p class="page-subtitle">Estadísticas agregadas y anónimas del tejido empresarial.</p>
+      </div>
+      <button class="btn-secondary" onclick="cargarMetricas()">↺ Actualizar</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon-text">USR</div>
+        <div class="kpi-valor" id="kpiUsuarios">—</div>
+        <div class="kpi-label">Usuarios registrados</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon-text">DGN</div>
+        <div class="kpi-valor" id="kpiDiagnosticos">—</div>
+        <div class="kpi-label">Diagnósticos realizados</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon-text">INI</div>
+        <div class="kpi-valor" id="kpiIniciativas">—</div>
+        <div class="kpi-label">Iniciativas totales</div>
+      </div>
+    </div>
+
+    <!-- Gráficas fila 1 -->
+    <div class="charts-grid-2">
+
+      <!-- Usuarios por sector -->
+      <div class="card chart-card">
+        <h3 class="chart-title">Usuarios por sector económico</h3>
+        <canvas id="chartSector" height="220"></canvas>
+      </div>
+
+      <!-- Usuarios por mes -->
+      <div class="card chart-card">
+        <h3 class="chart-title">Nuevos usuarios (últimos 6 meses)</h3>
+        <canvas id="chartMes" height="220"></canvas>
+      </div>
+
+    </div>
+
+    <!-- Gráficas fila 2 -->
+    <div class="charts-grid-3">
+
+      <!-- Edad -->
+      <div class="card chart-card">
+        <h3 class="chart-title">Distribución por edad</h3>
+        <canvas id="chartEdad" height="200"></canvas>
+      </div>
+
+      <!-- Género -->
+      <div class="card chart-card">
+        <h3 class="chart-title">Distribución por género</h3>
+        <canvas id="chartGenero" height="200"></canvas>
+      </div>
+
+      <!-- Tamaño -->
+      <div class="card chart-card">
+        <h3 class="chart-title">Tamaño de empresa</h3>
+        <canvas id="chartTamano" height="200"></canvas>
+      </div>
+
+    </div>
+
+    <!-- Matriz IGO global -->
+    <div class="card chart-card" style="margin-top:1.5rem">
+      <h3 class="chart-title">Distribución IGO global</h3>
+      <p class="chart-subtitle">Concentración agregada de todas las iniciativas por cuadrante</p>
+      <div class="igo-global-grid" id="igoGlobal"></div>
+    </div>
+
+  </div>
+
+  <!-- Chart.js desde CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

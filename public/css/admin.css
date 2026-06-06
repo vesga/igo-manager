@@ -1,0 +1,79 @@
+/* public/css/admin.css — Estilos del panel administrativo */
+
+.admin-tag {
+  font-size: 9px; font-weight: 900;
+  background: rgba(250,196,0,.2); color: #fac400;
+  border: 1px solid rgba(250,196,0,.3);
+  border-radius: 6px; padding: 2px 6px;
+  letter-spacing: .5px; text-transform: uppercase;
+  margin-left: 6px; vertical-align: middle;
+}
+
+/* ── KPIs ────────────────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.kpi-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 1.5rem;
+  text-align: center; transition: border-color .2s;
+}
+.kpi-card:hover { border-color: rgba(124,109,250,.3); }
+.kpi-icon  { font-size: 1.75rem; margin-bottom: .5rem; }
+.kpi-valor {
+  font-size: 2.5rem; font-weight: 900;
+  color: var(--accent2); line-height: 1;
+  margin-bottom: .4rem;
+}
+.kpi-label { font-size: 12px; color: var(--muted); }
+
+/* ── Grillas de gráficas ─────────────────────────────────────────────────── */
+.charts-grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1rem; margin-bottom: 1rem;
+}
+.charts-grid-3 {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+.chart-card { padding: 1.25rem; }
+.chart-title {
+  font-size: .875rem; font-weight: 800;
+  margin-bottom: .25rem; color: var(--text);
+}
+.chart-subtitle { font-size: 11px; color: var(--muted); margin-bottom: 1rem; }
+
+/* ── Matriz IGO global ───────────────────────────────────────────────────── */
+.igo-global-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: .75rem; margin-top: .75rem;
+}
+.igo-global-card {
+  border-radius: 12px; padding: 1rem 1.25rem;
+  border: 1px solid transparent;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.igo-global-card .igc-label {
+  font-size: 11px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.igo-global-card .igc-count {
+  font-size: 2rem; font-weight: 900; line-height: 1;
+}
+.igo-global-card .igc-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.igc-hacer_ya    { background:rgba(34,197,94,.08);  border-color:rgba(34,197,94,.2);   }
+.igc-estrategico { background:rgba(124,109,250,.08);border-color:rgba(124,109,250,.2); }
+.igc-rutina      { background:rgba(34,211,238,.07); border-color:rgba(34,211,238,.18); }
+.igc-descarte    { background:rgba(100,116,139,.07);border-color:rgba(100,116,139,.18);}
+.igc-hacer_ya    .igc-label { color:var(--verde);   } .igc-hacer_ya    .igc-count { color:var(--verde);   }
+.igc-estrategico .igc-label { color:var(--accent2); } .igc-estrategico .igc-count { color:var(--accent2); }
+.igc-rutina      .igc-label { color:var(--cyan);    } .igc-rutina      .igc-count { color:var(--cyan);    }
+.igc-descarte    .igc-label { color:#94a3b8;         } .igc-descarte    .igc-count { color:#94a3b8;         }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .kpi-grid, .charts-grid-2, .charts-grid-3 { grid-template-columns: 1fr; }
+  .igo-global-grid { grid-template-columns: 1fr; }
+}

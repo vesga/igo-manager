@@ -266,3 +266,133 @@ body {
 }
 .form-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
 .error-msg  { font-size: 11px; color: var(--rojo);  margin-top: 4px; }
+
+/* ══════════════════════════════════════════════════════════════════
+   SPRINT 4 — Mejoras responsive globales
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Navbar app: en móvil colapsar links en menú hamburguesa simple */
+@media (max-width: 720px) {
+  .app-navbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .app-nav-right { gap: 6px; flex-wrap: wrap; }
+  .app-nav-right .btn-nav-ghost {
+    padding: 5px 10px; font-size: 10px;
+  }
+  .nav-user { font-size: 11px; }
+}
+
+/* Contenedor principal en móvil */
+@media (max-width: 600px) {
+  .app-container { padding: 1rem .875rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  .page-title  { font-size: 1.3rem; }
+  .card        { padding: 1.25rem 1rem; }
+}
+
+/* Botones: en móvil ancho completo cuando están solos */
+@media (max-width: 480px) {
+  .btn-primary, .btn-secondary, .btn-premium {
+    font-size: 12px; padding: 9px 14px;
+  }
+}
+
+/* Modales: en móvil ocupar más ancho */
+@media (max-width: 540px) {
+  .modal-box { padding: 1.5rem 1.1rem; }
+  .modal-wide { max-width: 100%; margin: .5rem; border-radius: 14px; }
+  .modal-overlay { align-items: flex-end; }
+  .modal-box { border-radius: 18px 18px 0 0; }
+}
+
+/* Form grid a una columna en móvil */
+@media (max-width: 500px) {
+  .form-grid { grid-template-columns: 1fr !important; }
+  .modal-actions { flex-direction: column; }
+  .modal-actions button { width: 100%; text-align: center; }
+}
+
+/* Canvas de la matriz: siempre responsivo */
+.canvas-wrapper { overflow-x: auto; }
+#canvasIGO { min-width: 300px; }
+
+/* Dashboard layout: una columna en tablet */
+@media (max-width: 900px) {
+  .dash-layout { grid-template-columns: 1fr !important; }
+}
+
+/* Recomendaciones en móvil */
+@media (max-width: 480px) {
+  .recom-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Admin panel */
+@media (max-width: 700px) {
+  .kpi-grid        { grid-template-columns: 1fr !important; }
+  .charts-grid-2   { grid-template-columns: 1fr !important; }
+  .charts-grid-3   { grid-template-columns: 1fr !important; }
+  .igo-global-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Filtros plan de acción */
+@media (max-width: 480px) {
+  .filtros { gap: 4px; }
+  .filtro-btn { padding: 4px 10px; font-size: 10px; }
+}
+
+/* Tabla de tareas */
+@media (max-width: 480px) {
+  .tarea-actions { flex-wrap: wrap; }
+  .estado-select { width: 100%; }
+}
+
+/* ── Reemplazos elegantes de emojis ──────────────────────────────────────── */
+
+/* Estado vacío — texto en vez de emoji */
+.empty-icon-text {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--accent);
+  opacity: .25;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+/* Corona premium — tag elegante */
+.premium-crown-text {
+  background: linear-gradient(135deg, #c9a84c, #f0d080);
+  color: #1a1400;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* KPI icons admin — etiquetas de 3 letras */
+.kpi-icon-text {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: var(--accent);
+  opacity: .5;
+  margin-bottom: .75rem;
+  text-transform: uppercase;
+}
+
+/* Lock icon en botón premium — tag de texto */
+.lock-icon {
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(250,196,0,.2);
+  color: #fac400;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+}

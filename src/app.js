@@ -16,15 +16,18 @@ app.use(session({
   cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 }
 }));
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/views/index.html'));
-});
+app.get('/', (req, res) =>
+  res.sendFile(path.join(__dirname, '../public/views/index.html'))
+);
 
 app.use('/', require('./routes/auth'));
 app.use('/', require('./routes/perfil'));
 app.use('/', require('./routes/app'));
 app.use('/', require('./routes/iniciativas'));
-app.use('/', require('./routes/resumen'));   // ← Resumen ejecutivo IA
+app.use('/', require('./routes/resumen'));
+app.use('/', require('./routes/premium'));
+app.use('/', require('./routes/tareas'));   // ← Sprint 3
+app.use('/', require('./routes/admin'));    // ← Sprint 3
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

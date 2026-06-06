@@ -142,3 +142,41 @@
   .form-actions a,
   .form-actions button { flex: 1; text-align: center; }
 }
+
+/* ── Selector de género tipo tarjeta ─────────────────────────────────────── */
+.genero-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.genero-card {
+  flex: 1;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  user-select: none;
+}
+.genero-card input[type="radio"] {
+  display: none;
+}
+.genero-card:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.genero-card:has(input:checked) {
+  border-color: var(--accent);
+  background: rgba(124,109,250,.12);
+  color: var(--accent2);
+  font-weight: 700;
+}
