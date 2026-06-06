@@ -708,6 +708,118 @@
     });
   });
 
+  document.getElementById('btnDescargarPDF').addEventListener('click', () => {
+    const btn    = document.getElementById('btnDescargarPDF');
+    const texto  = resumenTextoEl.innerText;
+    if (!texto) return;
+
+    btn.textContent = 'Generando...';
+    btn.disabled    = true;
+
+    try {
+      // jsPDF está disponible como window.jspdf.jsPDF
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Configuración de página
+      const margenIzq  = 20;
+      const margenDer  = 20;
+      const anchoUtil  = 210 - margenIzq - margenDer;  // A4 = 210mm
+      let   cursorY    = 20;
+
+      // ── Encabezado ───────────────────────────────────────────────────────
+      doc.setFillColor(18, 18, 28);
+      doc.rect(0, 0, 210, 35, 'F');
+
+      doc.setTextColor(167, 139, 250);   // color acento
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('IGO Manager', margenIzq, 18);
+
+      doc.setTextColor(148, 163, 184);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Dinámica del Oriente S.A.S. · Resumen Ejecutivo', margenIzq, 26);
+
+      // Fecha
+      const fecha = new Date().toLocaleDateString('es-CO', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
+      doc.text(fecha, 210 - margenDer, 26, { align: 'right' });
+
+      cursorY = 45;
+
+      // ── Título del resumen ────────────────────────────────────────────────
+      doc.setTextColor(30, 30, 30);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Resumen Ejecutivo del Diagnóstico IGO', margenIzq, cursorY);
+      cursorY += 8;
+
+      // Línea separadora
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.4);
+      doc.line(margenIzq, cursorY, 210 - margenDer, cursorY);
+      cursorY += 8;
+
+      // ── Cuerpo del resumen ────────────────────────────────────────────────
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(50, 50, 50);
+
+      // Dividir el texto en líneas que quepan en el ancho
+      const lineas = doc.splitTextToSize(texto, anchoUtil);
+
+      lineas.forEach(linea => {
+        // Salto de página si es necesario
+        if (cursorY > 270) {
+          doc.addPage();
+          cursorY = 20;
+        }
+
+        // Detectar títulos con **negrita** ya procesada
+        if (linea.trim().length === 0) {
+          cursorY += 4;  // línea vacía = espacio
+          return;
+        }
+
+        // Si la línea empieza con número (1. 2. etc) = sección
+        if (/^\d+\./.test(linea.trim())) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(80, 60, 180);
+          doc.text(linea, margenIzq, cursorY);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(50, 50, 50);
+        } else {
+          doc.text(linea, margenIzq, cursorY);
+        }
+        cursorY += 6;
+      });
+
+      // ── Pie de página ─────────────────────────────────────────────────────
+      const totalPaginas = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPaginas; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(160, 160, 160);
+        doc.text(
+          `IGO Manager · Dinámica del Oriente S.A.S. · Página ${i} de ${totalPaginas}`,
+          105, 290, { align: 'center' }
+        );
+      }
+
+      // Descargar
+      doc.save(`Resumen_IGO_${new Date().toISOString().split('T')[0]}.pdf`);
+
+    } catch (err) {
+      console.error('Error generando PDF:', err);
+      alert('Error al generar el PDF. Intenta copiar el texto manualmente.');
+    } finally {
+      btn.textContent = 'Descargar PDF';
+      btn.disabled    = false;
+    }
+  });
+
   // (el listener del botón btnResumen está arriba en el bloque premium)
   document.getElementById('btnCerrarResumen').addEventListener('click', cerrarModalResumen);
   modalResumen.addEventListener('click', e => {

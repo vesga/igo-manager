@@ -242,9 +242,12 @@
   };
 
   // ── Eliminar ──────────────────────────────────────────────────────────────
-  window.eliminar = async function (id) {
+  window.eliminar = function (id) {
     const t = todasLasTareas.find(t => t.id === id);
-    if (!confirm(`¿Eliminar la tarea "${t?.descripcion?.substring(0,40)}..."?`)) return;
+    if (!t) return;
+    mostrarConfirmarPlan(
+      `¿Eliminar la tarea "${t.descripcion?.substring(0, 60)}"? Esta acción no se puede deshacer.`,
+      async () => {
         try {
           await api('DELETE', `/api/tareas/${id}`);
           mostrarAlerta('ok', 'Tarea eliminada');
