@@ -17,9 +17,9 @@
     </a>
     <div class="app-nav-right">
       <span class="nav-user" id="navUser">···</span>
-      <a href="/app/plan"   class="btn-nav-ghost">Plan de acción</a>
-      <a href="/app/perfil" class="btn-nav-ghost">Perfil</a>
-      <a href="/logout"     class="btn-nav-ghost">Salir</a>
+      <a href="/app/plan"      class="btn-nav-ghost">Plan de acción</a>
+      <a href="/app/perfil"    class="btn-nav-ghost">Perfil</a>
+      <a href="/logout"        class="btn-nav-ghost">Salir</a>
     </div>
   </nav>
 
@@ -28,10 +28,11 @@
     <div class="page-header">
       <div>
         <h1 class="page-title" id="titleBienvenida">Mi diagnóstico IGO</h1>
-        <p class="page-subtitle">Registra tus iniciativas, califícalas y ve en qué cuadrante caen.</p>
+        <p class="page-subtitle">Organiza tus iniciativas por tema y ve dónde caen en la matriz.</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn-premium" id="btnResumen">Resumen ejecutivo IA <span class="lock-icon" id="lockIcon">Premium</span></button>
+        <button class="btn-secondary" id="btnNuevaTema">+ Nuevo tema</button>
         <button class="btn-primary"   id="btnNuevaIniciativa">+ Nueva iniciativa</button>
       </div>
     </div>
@@ -41,18 +42,19 @@
 
     <div class="dash-layout">
 
-      <!-- Columna izquierda: iniciativas -->
+      <!-- Columna izquierda: temas e iniciativas -->
       <section class="dash-col-left">
-        <div class="col-header">
-          <h2>Iniciativas <span class="badge" id="badgeCount">0</span></h2>
-        </div>
 
+        <!-- Estado vacío total -->
         <div class="empty-state" id="emptyState">
           <div class="empty-icon-text">IGO</div>
-          <p>Aún no tienes iniciativas.<br/>Pulsa "+ Nueva iniciativa" para empezar.</p>
+          <p>Crea tu primer tema para empezar<br/>a registrar iniciativas.</p>
+          <button class="btn-primary" onclick="document.getElementById('btnNuevaTema').click()"
+            style="margin-top:1rem">+ Crear primer tema</button>
         </div>
 
-        <div id="listaIniciativas"></div>
+        <!-- Lista de temas con sus iniciativas -->
+        <div id="listaTemas"></div>
       </section>
 
       <!-- Columna derecha: matriz -->
@@ -60,6 +62,12 @@
         <div class="col-header">
           <h2>Matriz IGO</h2>
           <span class="col-hint" id="matrizHint">Califica iniciativas para verlas aquí</span>
+        </div>
+
+        <div class="canvas-toolbar">
+          <button class="btn-canvas" id="btnExportarPNG">Exportar imagen</button>
+          <button class="btn-canvas" id="btnHistorial">Historial</button>
+          <button class="btn-canvas btn-canvas-present" id="btnPresentacion">Pantalla completa</button>
         </div>
 
         <div class="canvas-wrapper">
@@ -70,7 +78,7 @@
           <h3>Recomendaciones</h3>
           <div class="recom-grid">
             <div class="recom-card recom-hacer_ya">
-              <div class="recom-label">¡Hacer Ya!</div>
+              <div class="recom-label">Hacer Ya</div>
               <p id="recomHacerYa"></p>
             </div>
             <div class="recom-card recom-estrategico">
@@ -91,16 +99,53 @@
     </div>
   </div>
 
-  <!-- Modal: crear / editar iniciativa -->
+  <!-- Modal: crear / editar TEMA -->
+  <div class="modal-overlay" id="modalTema" style="display:none">
+    <div class="modal-box modal-wide">
+      <button class="modal-close" id="btnCerrarModalTema">&times;</button>
+      <h2 id="modalTemaTitulo">Nuevo tema</h2>
+
+      <div class="form-group">
+        <label for="inputTemaNombre">Nombre del tema *</label>
+        <input type="text" id="inputTemaNombre" placeholder="Ej: Marketing, Operaciones, Finanzas" maxlength="150" />
+      </div>
+
+      <div class="form-group">
+        <label for="inputTemaDesc">Descripción (opcional)</label>
+        <textarea id="inputTemaDesc" rows="2" placeholder="¿Qué área o proyecto agrupa este tema?"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Color identificador</label>
+        <div class="color-picker" id="colorPicker"></div>
+        <input type="hidden" id="inputTemaColor" value="#7c6dfa" />
+      </div>
+
+      <input type="hidden" id="modalIdTema" value="" />
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarModalTema">Cancelar</button>
+        <button class="btn-primary"   id="btnGuardarTema">Guardar tema</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: crear / editar INICIATIVA -->
   <div class="modal-overlay" id="modalIniciativa" style="display:none">
     <div class="modal-box modal-wide">
       <button class="modal-close" id="btnCerrarModal">&times;</button>
       <h2 id="modalTitulo">Nueva iniciativa</h2>
 
       <div class="form-group">
+        <label for="selectTemaIniciativa">Tema *</label>
+        <select id="selectTemaIniciativa" required>
+          <option value="">Selecciona un tema...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label for="inputTitulo">Título *</label>
         <input type="text" id="inputTitulo" placeholder="Ej: Mejorar el proceso de ventas" maxlength="200" />
-        <span class="form-hint">Describe la necesidad o iniciativa en pocas palabras</span>
       </div>
 
       <div class="form-group">
@@ -109,6 +154,7 @@
       </div>
 
       <input type="hidden" id="modalIdIniciativa" value="" />
+      <input type="hidden" id="modalTemaPreselect" value="" />
 
       <div class="modal-actions">
         <button class="btn-secondary" id="btnCancelarModal">Cancelar</button>
@@ -119,15 +165,12 @@
 
   <!-- Modal: calificar -->
   <div class="modal-overlay" id="modalCalificar" style="display:none">
-    <div class="modal-box modal-wide">
-      <button class="modal-close" id="btnCerrarCalificar">&times;</button>
+<div class="modal-box modal-wide" style="max-height:85vh;overflow-y:auto">      <button class="modal-close" id="btnCerrarCalificar">&times;</button>
       <h2 id="calificarTitulo">Calificar</h2>
-
       <p class="modal-intro">
         Asigna un valor de <strong>1 a 10</strong> según tu criterio.
         Tú eres quien mejor conoce tu negocio — sin inteligencia artificial.
       </p>
-
       <div class="slider-group">
         <div class="slider-header">
           <div>
@@ -139,7 +182,6 @@
         <input type="range" id="sliderImportancia" min="1" max="10" value="5" class="slider" />
         <div class="slider-ticks"><span>1 · Poco</span><span>5 · Medio</span><span>10 · Crítico</span></div>
       </div>
-
       <div class="slider-group">
         <div class="slider-header">
           <div>
@@ -151,9 +193,7 @@
         <input type="range" id="sliderGobernabilidad" min="1" max="10" value="5" class="slider" />
         <div class="slider-ticks"><span>1 · Difícil</span><span>5 · Posible</span><span>10 · Fácil</span></div>
       </div>
-
       <input type="hidden" id="calificarId" value="" />
-
       <div class="modal-actions">
         <button class="btn-secondary" id="btnCancelarCalificar">Cancelar</button>
         <button class="btn-primary"   id="btnGuardarCalificacion">Guardar calificación</button>
@@ -161,11 +201,21 @@
     </div>
   </div>
 
+  <!-- Modal: Confirmar eliminación -->
+  <div class="modal-overlay" id="modalConfirmar" style="display:none">
+    <div class="modal-box" style="max-width:420px">
+      <h2 style="font-size:1rem;margin-bottom:.5rem" id="confirmarTituloEl">Confirmar eliminación</h2>
+      <p id="confirmarMensaje" style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6"></p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelarConfirmar">Cancelar</button>
+        <button class="btn-primary" id="btnAceptarConfirmar" style="background:#c0392b;border-color:#c0392b">Eliminar</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- Modal: Activar Premium -->
+  <!-- Modal premium -->
   <div class="modal-overlay" id="modalPremium" style="display:none">
-    <div class="modal-box modal-wide">
-      <button class="modal-close" id="btnCerrarPremium">&times;</button>
+<div class="modal-box modal-wide" style="max-height:85vh;overflow-y:auto">      <button class="modal-close" id="btnCerrarPremiumModal">&times;</button>
       <div class="premium-header">
         <div class="premium-crown-text">Premium</div>
         <div>
@@ -173,31 +223,90 @@
           <p class="resumen-subtitulo">El Resumen Ejecutivo IA es exclusivo para usuarios con acceso premium.</p>
         </div>
       </div>
-
       <div class="premium-beneficios">
         <div class="beneficio">Análisis narrativo de tu diagnóstico IGO</div>
         <div class="beneficio">Recomendaciones personalizadas por cuadrante</div>
         <div class="beneficio">Texto listo para compartir con tu equipo</div>
       </div>
-
-      <div class="form-group" style="margin-top:1.25rem">
-        <label for="inputCodigo">Ingresa tu código de acceso</label>
-        <input type="text" id="inputCodigo" placeholder="Ej: IGO-2024"
-               autocomplete="off" style="text-transform:uppercase;letter-spacing:2px" />
-        <span class="form-hint">Código entregado por Dinámica del Oriente</span>
+      <!-- Tabs: tengo código / quiero comprar -->
+      <div class="premium-tabs" id="premiumTabs">
+        <button class="premium-tab premium-tab-active" id="tabCodigo" onclick="switchPremiumTab('codigo')">
+          Ya tengo código
+        </button>
+        <button class="premium-tab" id="tabPagar" onclick="switchPremiumTab('pagar')">
+          Obtener acceso
+        </button>
       </div>
 
-      <div class="alert alert-error"   id="premiumError"   style="display:none"></div>
-      <div class="alert alert-success" id="premiumSuccess" style="display:none"></div>
+      <!-- Panel: ingresar código -->
+      <div id="panelCodigo">
+        <div class="form-group" style="margin-top:1rem">
+          <label for="inputCodigo">Código de acceso</label>
+          <input type="text" id="inputCodigo" placeholder="Ej: IGO-XXXX-XXXX"
+                 autocomplete="off" style="text-transform:uppercase;letter-spacing:2px" />
+          <span class="form-hint">Código enviado a tu correo tras aprobar el pago</span>
+        </div>
+        <div class="alert alert-error"   id="premiumError"   style="display:none"></div>
+        <div class="alert alert-success" id="premiumSuccess" style="display:none"></div>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="btnCancelarPremium">Cancelar</button>
+          <button class="btn-primary"   id="btnActivarPremium">Activar →</button>
+        </div>
+      </div>
 
-      <div class="modal-actions">
-        <button class="btn-secondary" id="btnCancelarPremium">Cancelar</button>
-        <button class="btn-primary"   id="btnActivarPremium">Activar acceso →</button>
+      <!-- Panel: formulario de pago -->
+      <div id="panelPagar" style="display:none">
+        <div class="pago-precio">
+          <span class="pago-monto" id="pagoPrecio">$50.000 COP</span>
+          <span class="pago-desc">Acceso premium permanente · Un solo pago</span>
+        </div>
+
+        <div class="pago-instrucciones" id="pagoInstrucciones">
+          <p>Realiza tu pago y sube el comprobante. En menos de 24 horas recibirás tu código por correo.</p>
+          <div class="pago-nequi">
+            <span class="pago-nequi-label">Nequi / Transferencia:</span>
+            <span class="pago-nequi-num" id="pagoNequiNum">Cargando...</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pagoNombre">Tu nombre *</label>
+          <input type="text" id="pagoNombre" placeholder="Nombre completo" />
+        </div>
+        <div class="form-group">
+          <label for="pagoCorreo">Correo donde recibirás el código *</label>
+          <input type="email" id="pagoCorreo" placeholder="tu@correo.com" />
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="pagoMetodo">Método de pago *</label>
+            <select id="pagoMetodo">
+              <option value="">Selecciona...</option>
+              <option value="Nequi">Nequi</option>
+              <option value="Transferencia">Transferencia bancaria</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="pagoComprobante">Comprobante (foto/PDF)</label>
+            <input type="file" id="pagoComprobante" accept=".jpg,.jpeg,.png,.pdf,.webp"
+              style="font-size:12px;padding:8px" />
+            <span class="form-hint">Máx. 5 MB</span>
+          </div>
+        </div>
+
+        <div class="alert alert-error"   id="pagoError"   style="display:none"></div>
+        <div class="alert alert-success" id="pagoSuccess" style="display:none"></div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" id="btnCancelarPago">Cancelar</button>
+          <button class="btn-primary"   id="btnEnviarPago">Enviar solicitud →</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Resumen ejecutivo IA -->
+  <!-- Modal resumen ejecutivo -->
   <div class="modal-overlay" id="modalResumen" style="display:none">
     <div class="modal-box modal-resumen">
       <button class="modal-close" id="btnCerrarResumen">&times;</button>
@@ -208,25 +317,17 @@
           <p class="resumen-subtitulo">Generado por inteligencia artificial a partir de tu diagnóstico IGO</p>
         </div>
       </div>
-
-      <!-- Estado: cargando -->
       <div id="resumenCargando" style="display:none">
         <div class="resumen-loading">
           <div class="loading-dots"><span></span><span></span><span></span></div>
           <p>Analizando tu diagnóstico...</p>
         </div>
       </div>
-
-      <!-- Estado: error -->
       <div class="alert alert-error" id="resumenError" style="display:none"></div>
-
-      <!-- Estado: contenido -->
       <div id="resumenContenido" style="display:none">
         <div class="resumen-texto" id="resumenTexto"></div>
         <div class="resumen-footer">
-          <span class="resumen-disclaimer">
-            Este resumen es orientativo. Las decisiones finales son tuyas.
-          </span>
+          <span class="resumen-disclaimer">Este resumen es orientativo. Las decisiones finales son tuyas.</span>
           <button class="btn-secondary" id="btnCopiarResumen">Copiar texto</button>
           <button class="btn-secondary" id="btnDescargarPDF">Descargar PDF</button>
         </div>
@@ -234,17 +335,47 @@
     </div>
   </div>
 
-
-  <!-- Modal: Confirmar eliminación -->
-  <div class="modal-overlay" id="modalConfirmar" style="display:none">
-    <div class="modal-box" style="max-width:420px">
-      <h2 style="font-size:1rem;margin-bottom:.5rem">Eliminar iniciativa</h2>
-      <p id="confirmarMensaje" style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6"></p>
-      <div class="modal-actions">
-        <button class="btn-secondary" id="btnCancelarConfirmar">Cancelar</button>
-        <button class="btn-primary" id="btnAceptarConfirmar"
-          style="background:#c0392b;border-color:#c0392b">Eliminar</button>
+  <!-- Modal historial -->
+  <div class="modal-overlay" id="modalHistorial" style="display:none">
+    <div class="modal-box modal-wide" style="max-width:600px;max-height:88vh;overflow-y:auto">
+      <button class="modal-close" id="btnCerrarHistorial">&times;</button>
+      <h2 style="margin-bottom:.25rem">Historial de diagnósticos</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:1.25rem">
+        Cada calificación genera una foto del estado de tu matriz.
+      </p>
+      <div id="historialCargando" style="text-align:center;padding:2rem;color:var(--muted);font-size:13px">Cargando...</div>
+      <div id="historialVacio" style="display:none;text-align:center;padding:2rem;color:var(--dim);font-size:13px">
+        Aún no hay diagnósticos guardados. Califica tus iniciativas para empezar.
       </div>
+      <div id="listaHistorial"></div>
+      <div id="historialDetalle" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+          <button class="btn-secondary" id="btnVolverHistorial" style="padding:5px 12px;font-size:12px">← Volver</button>
+          <span id="historialDetalletitulo" style="font-size:13px;font-weight:700;color:var(--muted)"></span>
+        </div>
+        <canvas id="canvasHistorial" width="520" height="340"
+          style="width:100%;border-radius:10px;border:1px solid var(--border)"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modo presentación -->
+  <div id="overlayPresentacion" style="display:none;position:fixed;inset:0;background:#0b0b10;
+    z-index:9999;flex-direction:column;align-items:center;justify-content:center">
+    <div style="position:absolute;top:20px;right:20px;display:flex;gap:10px">
+      <span id="presentFecha" style="font-size:12px;color:#475569;align-self:center"></span>
+      <button id="btnCerrarPresentacion" style="padding:8px 16px;background:rgba(255,255,255,.08);
+        border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#94a3b8;
+        font-size:12px;cursor:pointer;font-weight:700">Salir ✕</button>
+    </div>
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#475569;margin-bottom:6px">Diagnóstico IGO</div>
+      <div id="presentEmpresa" style="font-size:1.4rem;font-weight:900;color:#f1f5f9"></div>
+    </div>
+    <canvas id="canvasPresentacion" style="max-width:90vw;max-height:72vh;border-radius:16px;
+      border:1px solid rgba(255,255,255,.06)"></canvas>
+    <div style="margin-top:16px;font-size:11px;color:#334155;letter-spacing:1px">
+      IGO Manager · Dinámica del Oriente S.A.S.
     </div>
   </div>
 

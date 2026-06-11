@@ -484,3 +484,239 @@
   border-radius: 10px;
   padding: 9px 14px;
 }
+
+/* ── Toolbar del canvas ──────────────────────────────────────────────────── */
+.canvas-toolbar {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.btn-canvas {
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  letter-spacing: .3px;
+  transition: all .18s;
+}
+.btn-canvas:hover {
+  border-color: var(--accent);
+  color: var(--accent2);
+  background: rgba(124,109,250,.08);
+}
+.btn-canvas-present:hover {
+  border-color: var(--verde);
+  color: var(--verde);
+  background: rgba(34,197,94,.07);
+}
+
+/* ── Tarjetas del historial ──────────────────────────────────────────────── */
+.historial-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: .875rem 1rem;
+  margin-bottom: .625rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  transition: border-color .2s;
+  cursor: pointer;
+}
+.historial-card:hover { border-color: rgba(124,109,250,.35); }
+
+.historial-fecha {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.historial-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.historial-badge {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(124,109,250,.1);
+  border: 1px solid rgba(124,109,250,.2);
+  color: var(--accent2);
+  white-space: nowrap;
+}
+
+/* ── Sección de tema ─────────────────────────────────────────────────────── */
+.tema-seccion {
+  margin-bottom: 1.5rem;
+}
+.tema-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: .6rem .75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: .625rem;
+  cursor: default;
+}
+.tema-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tema-nombre {
+  font-size: .875rem;
+  font-weight: 800;
+  color: var(--text);
+  flex: 1;
+}
+.tema-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dim);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+.tema-actions {
+  display: flex;
+  gap: 4px;
+}
+.btn-tema {
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-tema:hover     { color: var(--text); border-color: var(--accent); }
+.btn-tema-del:hover { color: var(--rojo); border-color: var(--rojo); }
+.btn-tema-add {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  margin-top: 4px;
+  transition: all .15s;
+}
+.btn-tema-add:hover {
+  border-color: var(--accent);
+  color: var(--accent2);
+  background: rgba(124,109,250,.06);
+}
+
+/* ── Color picker del modal de tema ─────────────────────────────────────── */
+.color-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .15s, border-color .15s;
+}
+.color-swatch:hover    { transform: scale(1.15); }
+.color-swatch.selected { border-color: #fff; transform: scale(1.1); }
+
+/* ── Tabs del modal premium ──────────────────────────────────────────────── */
+.premium-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  margin: 1rem 0 0;
+}
+.premium-tab {
+  flex: 1;
+  padding: 8px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .18s;
+}
+.premium-tab-active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+
+/* ── Precio ──────────────────────────────────────────────────────────────── */
+.pago-precio {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 1rem 0 .75rem;
+  padding: .875rem 1rem;
+  background: rgba(124,109,250,.08);
+  border: 1px solid rgba(124,109,250,.2);
+  border-radius: 10px;
+}
+.pago-monto {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--accent2);
+}
+.pago-desc {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── Instrucciones Nequi ─────────────────────────────────────────────────── */
+.pago-instrucciones {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+.pago-nequi {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: .5rem;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.pago-nequi-label {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 12px;
+}
+.pago-nequi-num {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--verde);
+  letter-spacing: 1px;
+}

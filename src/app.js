@@ -23,11 +23,14 @@ app.get('/', (req, res) =>
 app.use('/', require('./routes/auth'));
 app.use('/', require('./routes/perfil'));
 app.use('/', require('./routes/app'));
+app.use('/', require('./routes/temas'));
 app.use('/', require('./routes/iniciativas'));
 app.use('/', require('./routes/resumen'));
 app.use('/', require('./routes/premium'));
-app.use('/', require('./routes/tareas'));   // ← Sprint 3
-app.use('/', require('./routes/admin'));    // ← Sprint 3
+app.use('/', require('./routes/tareas'));
+app.use('/', require('./routes/admin'));
+app.use('/', require('./routes/historial'));
+app.use('/', require('./routes/pagos'));    // ← nuevo
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

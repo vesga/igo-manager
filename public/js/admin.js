@@ -175,3 +175,126 @@
   cargarMetricas();
 
 })();
+
+// ── Solicitudes de pago premium ───────────────────────────────────────────────
+let _rechazarId = null;
+
+window.cargarSolicitudes = async function () {
+  const cargandoEl = document.getElementById('solicitudesCargando');
+  const vacioEl    = document.getElementById('solicitudesVacio');
+  const listaEl    = document.getElementById('listaSolicitudes');
+
+  cargandoEl.style.display = 'block';
+  vacioEl.style.display    = 'none';
+  listaEl.innerHTML        = '';
+
+  try {
+    const r    = await fetch('/api/admin/pagos');
+    const data = await r.json();
+    cargandoEl.style.display = 'none';
+
+    if (!data.solicitudes || data.solicitudes.length === 0) {
+      vacioEl.style.display = 'block';
+      return;
+    }
+
+    const ESTADO_ESTILO = {
+      pendiente: 'background:rgba(250,196,0,.12);color:#fac400;border:1px solid rgba(250,196,0,.3)',
+      aprobada:  'background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.3)',
+      rechazada: 'background:rgba(244,63,94,.1);color:#fb7185;border:1px solid rgba(244,63,94,.25)',
+    };
+
+    listaEl.innerHTML = data.solicitudes.map(s => {
+      const fecha = new Date(s.creado_en).toLocaleDateString('es-CO', {
+        day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+      });
+      const estilo = ESTADO_ESTILO[s.estado] || '';
+      const comp   = s.comprobante_url
+        ? `<a href="${s.comprobante_url}" target="_blank"
+             style="font-size:11px;color:var(--accent2);text-decoration:none;font-weight:700">
+             Ver comprobante →
+           </a>`
+        : `<span style="font-size:11px;color:var(--dim)">Sin comprobante</span>`;
+
+      const botones = s.estado === 'pendiente' ? `
+        <button onclick="aprobarSolicitud(${s.id})"
+          style="padding:5px 12px;font-size:11px;font-weight:700;border-radius:7px;
+          border:1px solid rgba(34,197,94,.3);background:rgba(34,197,94,.1);
+          color:#22c55e;cursor:pointer;margin-right:6px">
+          Aprobar
+        </button>
+        <button onclick="abrirRechazar(${s.id})"
+          style="padding:5px 12px;font-size:11px;font-weight:700;border-radius:7px;
+          border:1px solid rgba(244,63,94,.25);background:rgba(244,63,94,.08);
+          color:#fb7185;cursor:pointer">
+          Rechazar
+        </button>` : (s.codigo_enviado
+          ? `<span style="font-size:11px;color:var(--muted)">Código: <strong>${s.codigo_enviado}</strong></span>`
+          : '');
+
+      return `
+        <div style="background:var(--surface2);border:1px solid var(--border);
+          border-radius:12px;padding:1rem 1.25rem;margin-bottom:.75rem">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:.5rem">
+            <div>
+              <div style="font-size:.875rem;font-weight:800;color:var(--text)">${s.nombre}</div>
+              <div style="font-size:11px;color:var(--muted)">${s.correo} · ${s.metodo_pago} · ${fecha}</div>
+            </div>
+            <span style="font-size:9px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;
+              padding:3px 9px;border-radius:20px;white-space:nowrap;${estilo}">
+              ${s.estado}
+            </span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            ${comp}
+            ${botones}
+          </div>
+        </div>`;
+    }).join('');
+
+  } catch (err) {
+    cargandoEl.style.display = 'none';
+    console.error('Error cargando solicitudes:', err);
+  }
+};
+
+window.aprobarSolicitud = async function (id) {
+  if (!confirm('¿Aprobar esta solicitud? Se generará el código y se enviará por correo.')) return;
+  try {
+    const r    = await fetch(`/api/admin/pagos/${id}/aprobar`, { method: 'POST' });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    alert(`Aprobado. Código generado: ${data.codigo}`);
+    cargarSolicitudes();
+    cargarMetricas();
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+};
+
+window.abrirRechazar = function (id) {
+  _rechazarId = id;
+  document.getElementById('notasRechazo').value = '';
+  document.getElementById('modalRechazar').style.display = 'flex';
+};
+
+document.getElementById('btnConfirmarRechazo').addEventListener('click', async () => {
+  if (!_rechazarId) return;
+  const notas = document.getElementById('notasRechazo').value.trim();
+  try {
+    const r = await fetch(`/api/admin/pagos/${_rechazarId}/rechazar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notas }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error);
+    document.getElementById('modalRechazar').style.display = 'none';
+    cargarSolicitudes();
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+});
+
+// Cargar solicitudes al abrir el panel
+cargarSolicitudes();

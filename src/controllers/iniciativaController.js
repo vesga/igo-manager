@@ -1,8 +1,9 @@
 // src/controllers/iniciativaController.js
 // CRUD de iniciativas (RF-05, RF-06) y calificación IGO (RF-07, RF-08, RF-10, RF-11).
 
-const pool     = require('../config/db');
-const motorIGO = require('../services/motorIGO');
+const pool          = require('../config/db');
+const motorIGO      = require('../services/motorIGO');
+const historialCtrl = require('./historialController');
 
 // ── Listar iniciativas con cuadrantes calculados ──────────────────────────────
 // GET /api/iniciativas → JSON con todas las iniciativas del usuario + promedios
@@ -10,10 +11,13 @@ exports.listar = async (req, res) => {
   const usuarioId = req.session.usuarioId;
   try {
     const [filas] = await pool.execute(
-      `SELECT id, titulo, descripcion, importancia, gobernabilidad, cuadrante, creado_en
-       FROM iniciativa
-       WHERE usuario_id = ?
-       ORDER BY creado_en DESC`,
+      `SELECT i.id, i.titulo, i.descripcion, i.importancia, i.gobernabilidad,
+              i.cuadrante, i.creado_en, i.tema_id,
+              t.nombre AS tema_nombre, t.color AS tema_color
+       FROM iniciativa i
+       LEFT JOIN tema t ON t.id = i.tema_id
+       WHERE i.usuario_id = ?
+       ORDER BY i.tema_id ASC, i.creado_en DESC`,
       [usuarioId]
     );
 
@@ -37,17 +41,20 @@ exports.listar = async (req, res) => {
 // POST /api/iniciativas → { titulo, descripcion }
 exports.crear = async (req, res) => {
   const usuarioId = req.session.usuarioId;
-  const { titulo, descripcion } = req.body;
+  const { titulo, descripcion, tema_id } = req.body;
 
   if (!titulo || !titulo.trim()) {
     return res.status(400).json({ error: 'El título es obligatorio' });
   }
+  if (!tema_id) {
+    return res.status(400).json({ error: 'Debes seleccionar un tema' });
+  }
 
   try {
     const [resultado] = await pool.execute(
-      `INSERT INTO iniciativa (usuario_id, titulo, descripcion)
-       VALUES (?, ?, ?)`,
-      [usuarioId, titulo.trim(), descripcion?.trim() || null]
+      `INSERT INTO iniciativa (usuario_id, tema_id, titulo, descripcion)
+       VALUES (?, ?, ?, ?)`,
+      [usuarioId, tema_id, titulo.trim(), descripcion?.trim() || null]
     );
     res.status(201).json({ id: resultado.insertId, mensaje: 'Iniciativa creada' });
   } catch (err) {
@@ -152,7 +159,10 @@ exports.calificar = async (req, res) => {
       }
     }
 
-    // 4. Devolver los nuevos promedios para que el cliente redibuje el plano
+    // 4. Guardar snapshot en el historial (no bloquea la respuesta)
+    historialCtrl.guardarSnapshot(usuarioId);
+
+    // 5. Devolver los nuevos promedios para que el cliente redibuje el plano
     res.json({ mensaje: 'Calificación guardada', promedioI, promedioG });
   } catch (err) {
     console.error('Error en calificar:', err);

@@ -99,6 +99,41 @@
 
   </div>
 
+  <!-- Sección solicitudes de pago premium -->
+  <div class="card chart-card" style="margin-top:1.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+      <div>
+        <h3 class="chart-title">Solicitudes de acceso Premium</h3>
+        <p class="chart-subtitle">Revisa, aprueba o rechaza cada solicitud</p>
+      </div>
+      <button class="btn-secondary" onclick="cargarSolicitudes()" style="font-size:12px;padding:6px 14px">
+        ↺ Actualizar
+      </button>
+    </div>
+    <div id="solicitudesCargando" style="text-align:center;padding:2rem;color:var(--muted);font-size:13px">
+      Cargando solicitudes...
+    </div>
+    <div id="solicitudesVacio" style="display:none;text-align:center;padding:2rem;color:var(--dim);font-size:13px">
+      No hay solicitudes pendientes.
+    </div>
+    <div id="listaSolicitudes"></div>
+  </div>
+
+  <!-- Modal rechazar -->
+  <div class="modal-overlay" id="modalRechazar" style="display:none">
+    <div class="modal-box" style="max-width:420px">
+      <h2 style="font-size:1rem;margin-bottom:.75rem">Rechazar solicitud</h2>
+      <div class="form-group">
+        <label for="notasRechazo">Motivo (opcional)</label>
+        <textarea id="notasRechazo" rows="3" placeholder="Ej: Comprobante no válido..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="document.getElementById('modalRechazar').style.display='none'">Cancelar</button>
+        <button class="btn-primary" id="btnConfirmarRechazo" style="background:#c0392b;border-color:#c0392b">Rechazar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Chart.js desde CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="/js/admin.js"></script>
