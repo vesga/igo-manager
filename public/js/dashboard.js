@@ -580,4 +580,334 @@
   });
 
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // INFORME PDF COMPLETO
+  // Genera un documento profesional con: portada, matriz IGO, iniciativas
+  // por cuadrante, plan de acción y (si es premium) resumen IA.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  document.getElementById('btnInformePDF').addEventListener('click', async () => {
+    const btn = document.getElementById('btnInformePDF');
+    btn.textContent = 'Generando...';
+    btn.disabled    = true;
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      // Colores corporativos
+      const MORADO  = [124, 109, 250];
+      const VERDE   = [34,  197, 94];
+      const CYAN    = [34,  211, 238];
+      const GRIS    = [100, 116, 139];
+      const BG_DARK = [18,  18,  28];
+      const TEXT    = [30,  30,  50];
+      const MUTED   = [100, 116, 139];
+
+      // Obtener datos de la empresa
+      let empresa = {}, sesion = {};
+      try {
+        const [pe, ps] = await Promise.all([
+          fetch('/app/perfil/datos').then(r => r.json()),
+          fetch('/api/sesion').then(r => r.json()),
+        ]);
+        empresa = pe.empresa || {};
+        sesion  = ps;
+      } catch (_) {}
+
+      const nombreEmpresa = empresa.nombre || sesion.nombre || 'Mi empresa';
+      const fecha = new Date().toLocaleDateString('es-CO', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
+
+      // ── PÁGINA 1: PORTADA ─────────────────────────────────────────────────
+      // Fondo oscuro
+      doc.setFillColor(...BG_DARK);
+      doc.rect(0, 0, 210, 297, 'F');
+
+      // Franja lateral izquierda
+      doc.setFillColor(...MORADO);
+      doc.rect(0, 0, 6, 297, 'F');
+
+      // Logo / nombre app
+      doc.setTextColor(...MORADO);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text('IGO MANAGER', 20, 35);
+
+      doc.setTextColor(148, 163, 184);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Dinámica del Oriente S.A.S.', 20, 42);
+
+      // Línea decorativa
+      doc.setDrawColor(...MORADO);
+      doc.setLineWidth(0.5);
+      doc.line(20, 48, 190, 48);
+
+      // Título principal
+      doc.setTextColor(241, 245, 249);
+      doc.setFontSize(28);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Diagnóstico', 20, 90);
+      doc.text('IGO', 20, 108);
+
+      doc.setTextColor(...MORADO);
+      doc.setFontSize(28);
+      doc.text('Empresarial', 55, 108);
+
+      // Nombre empresa
+      doc.setTextColor(241, 245, 249);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text(nombreEmpresa, 20, 130);
+
+      // Datos
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(148, 163, 184);
+      if (empresa.sector)   doc.text(`Sector: ${empresa.sector}`, 20, 142);
+      if (empresa.tamano)   doc.text(`Tamaño: ${empresa.tamano}`, 20, 149);
+      if (empresa.ubicacion) doc.text(`Ciudad: ${empresa.ubicacion}`, 20, 156);
+
+      // Fecha
+      doc.setTextColor(148, 163, 184);
+      doc.setFontSize(9);
+      doc.text(fecha, 20, 175);
+
+      // Stats en portada
+      const calificadas = estado.iniciativas.filter(i => i.cuadrante);
+      const cuadrantes  = { hacer_ya:0, estrategico:0, rutina:0, descarte:0 };
+      calificadas.forEach(i => { if(cuadrantes[i.cuadrante]!==undefined) cuadrantes[i.cuadrante]++; });
+
+      const stats = [
+        { label: 'Temas',       val: estado.temas.length,       color: MORADO },
+        { label: 'Iniciativas', val: estado.iniciativas.length,  color: CYAN   },
+        { label: 'Calificadas', val: calificadas.length,         color: VERDE  },
+      ];
+      stats.forEach((s, idx) => {
+        const x = 20 + idx * 60;
+        doc.setFillColor(...s.color);
+        doc.roundedRect(x, 195, 52, 28, 3, 3, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20); doc.setFont('helvetica', 'bold');
+        doc.text(String(s.val), x + 26, 210, { align: 'center' });
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+        doc.text(s.label.toUpperCase(), x + 26, 217, { align: 'center' });
+      });
+
+      // Pie de portada
+      doc.setTextColor(71, 85, 105);
+      doc.setFontSize(7);
+      doc.text('Metodología IGO — Importancia vs. Gobernabilidad', 105, 285, { align: 'center' });
+
+      // ── PÁGINA 2: MATRIZ IGO ──────────────────────────────────────────────
+      doc.addPage();
+      encabezadoPagina(doc, 'Matriz IGO', nombreEmpresa, MORADO, BG_DARK, MUTED);
+
+      // Dibujar la matriz en un canvas temporal y añadirla como imagen
+      const tmpCanvas = document.createElement('canvas');
+      tmpCanvas.width  = 900; tmpCanvas.height = 640;
+      const tmpCtx = tmpCanvas.getContext('2d');
+      dibujarMatrizEnCanvas(tmpCanvas, tmpCtx, estado, 900, 640);
+      const matrizImg = tmpCanvas.toDataURL('image/png');
+      doc.addImage(matrizImg, 'PNG', 15, 35, 180, 115);
+
+      // Leyenda de temas
+      let ly = 158;
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...TEXT);
+      doc.text('Referencias:', 15, ly); ly += 6;
+
+      const temasConInis = estado.temas.filter(t =>
+        calificadas.some(i => i.tema_id === t.id)
+      );
+      temasConInis.forEach((tema, idx) => {
+        const col = hexToRgb(tema.color);
+        doc.setFillColor(...col);
+        doc.circle(18, ly - 1.5, 2, 'F');
+        doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+        doc.setTextColor(...TEXT);
+        doc.text(tema.nombre, 23, ly);
+        ly += 6;
+        if (ly > 270) { doc.addPage(); encabezadoPagina(doc,'Matriz IGO (cont.)','',MORADO,BG_DARK,MUTED); ly = 35; }
+      });
+
+      // ── PÁGINA 3+: INICIATIVAS POR CUADRANTE ─────────────────────────────
+      doc.addPage();
+      encabezadoPagina(doc, 'Iniciativas por cuadrante', nombreEmpresa, MORADO, BG_DARK, MUTED);
+
+      const CUAD_INFO = {
+        hacer_ya:    { label: '¡Hacer Ya!',  color: VERDE,  desc: 'Ejecutar de inmediato — alta importancia y capacidad' },
+        estrategico: { label: 'Estratégico', color: MORADO, desc: 'Buscar recursos o aliados antes de ejecutar' },
+        rutina:      { label: 'Rutina',      color: CYAN,   desc: 'Delegar o automatizar' },
+        descarte:    { label: 'Descarte',    color: GRIS,   desc: 'No invertir energía ahora' },
+      };
+
+      let py = 35;
+      ['hacer_ya','estrategico','rutina','descarte'].forEach(clave => {
+        const inis = calificadas.filter(i => i.cuadrante === clave);
+        if (inis.length === 0) return;
+        const info = CUAD_INFO[clave];
+
+        // Encabezado de cuadrante
+        doc.setFillColor(...info.color);
+        doc.roundedRect(15, py, 180, 10, 2, 2, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+        doc.text(info.label.toUpperCase(), 20, py + 6.5);
+        doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+        doc.text(info.desc, 105, py + 6.5, { align: 'center' });
+        py += 13;
+
+        inis.forEach(ini => {
+          if (py > 265) {
+            doc.addPage();
+            encabezadoPagina(doc, 'Iniciativas (cont.)', '', MORADO, BG_DARK, MUTED);
+            py = 35;
+          }
+          // Nombre del tema
+          const tema = estado.temas.find(t => t.id === ini.tema_id);
+          const temaCol = tema ? hexToRgb(tema.color) : GRIS;
+
+          doc.setFillColor(245, 245, 250);
+          doc.roundedRect(15, py, 180, 14, 2, 2, 'F');
+
+          // Dot de tema
+          doc.setFillColor(...temaCol);
+          doc.circle(21, py + 5, 2, 'F');
+
+          doc.setTextColor(...TEXT);
+          doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+          doc.text(ini.titulo, 26, py + 5.5);
+
+          doc.setFontSize(7); doc.setFont('helvetica', 'normal');
+          doc.setTextColor(...MUTED);
+          const meta = `Imp: ${ini.importancia}/10  ·  Gob: ${ini.gobernabilidad}/10${tema ? '  ·  ' + tema.nombre : ''}`;
+          doc.text(meta, 26, py + 10.5);
+
+          py += 16;
+        });
+        py += 4;
+      });
+
+      // ── PÁGINA PLAN DE ACCIÓN ─────────────────────────────────────────────
+      try {
+        const dataTareas = await fetch('/api/tareas').then(r => r.json());
+        const tareas = dataTareas.tareas || [];
+
+        if (tareas.length > 0) {
+          doc.addPage();
+          encabezadoPagina(doc, 'Plan de acción', nombreEmpresa, MORADO, BG_DARK, MUTED);
+
+          // Barra de progreso
+          const terminadas = tareas.filter(t => t.estado === 'Terminado').length;
+          const pctPlan    = Math.round((terminadas / tareas.length) * 100);
+          py = 35;
+
+          doc.setFillColor(230, 230, 240);
+          doc.roundedRect(15, py, 180, 6, 3, 3, 'F');
+          if (pctPlan > 0) {
+            doc.setFillColor(...VERDE);
+            doc.roundedRect(15, py, 180 * pctPlan / 100, 6, 3, 3, 'F');
+          }
+          doc.setTextColor(...MUTED);
+          doc.setFontSize(7);
+          doc.text(`${pctPlan}% completado · ${terminadas} de ${tareas.length} tareas`, 105, py + 4.5, { align: 'center' });
+          py += 12;
+
+          const ESTADO_COLOR = {
+            'Pendiente':  [245, 158,  11],
+            'En proceso': [ 34, 211, 238],
+            'Terminado':  [ 34, 197,  94],
+            'Abortado':   [244,  63,  94],
+          };
+
+          tareas.forEach(t => {
+            if (py > 265) {
+              doc.addPage();
+              encabezadoPagina(doc, 'Plan de acción (cont.)', '', MORADO, BG_DARK, MUTED);
+              py = 35;
+            }
+            const ec = ESTADO_COLOR[t.estado] || GRIS;
+            doc.setFillColor(245, 245, 250);
+            doc.roundedRect(15, py, 180, 16, 2, 2, 'F');
+
+            // Pill de estado
+            doc.setFillColor(...ec);
+            doc.roundedRect(155, py + 3, 38, 6, 2, 2, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(6); doc.setFont('helvetica', 'bold');
+            doc.text(t.estado.toUpperCase(), 174, py + 7, { align: 'center' });
+
+            doc.setTextColor(...TEXT);
+            doc.setFontSize(8); doc.setFont('helvetica', 'bold');
+            const descCorta = t.descripcion.length > 60 ? t.descripcion.substring(0,60)+'…' : t.descripcion;
+            doc.text(descCorta, 20, py + 6);
+
+            doc.setFontSize(6.5); doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...MUTED);
+            let meta2 = `Iniciativa: ${t.iniciativa_titulo}`;
+            if (t.fecha_limite) {
+              const fl = new Date(t.fecha_limite+'T00:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'});
+              meta2 += `  ·  Fecha: ${fl}`;
+            }
+            if (t.responsable) meta2 += `  ·  Resp.: ${t.responsable}`;
+            doc.text(meta2, 20, py + 12);
+            py += 18;
+          });
+        }
+      } catch (_) {}
+
+      // ── PIE DE PÁGINA en todas las páginas ────────────────────────────────
+      const totalPags = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPags; i++) {
+        doc.setPage(i);
+        doc.setFillColor(...BG_DARK);
+        doc.rect(0, 289, 210, 8, 'F');
+        doc.setFontSize(7);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`IGO Manager · Dinámica del Oriente S.A.S. · ${fecha}`, 15, 294);
+        doc.text(`${i} / ${totalPags}`, 195, 294, { align: 'right' });
+      }
+
+      doc.save(`Informe_IGO_${nombreEmpresa.replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+
+    } catch (err) {
+      console.error('Error generando informe PDF:', err);
+      mostrarAlerta('error', 'Error al generar el informe. Intenta de nuevo.');
+    } finally {
+      btn.textContent = 'Informe PDF';
+      btn.disabled    = false;
+    }
+  });
+
+  // Helper: encabezado de página interior
+  function encabezadoPagina(doc, titulo, subtitulo, colorMorado, colorBG, colorMuted) {
+    doc.setFillColor(...colorBG);
+    doc.rect(0, 0, 210, 20, 'F');
+    doc.setFillColor(...colorMorado);
+    doc.rect(0, 0, 4, 20, 'F');
+    doc.setTextColor(...colorMorado);
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    doc.text(titulo, 10, 13);
+    if (subtitulo) {
+      doc.setTextColor(...colorMuted);
+      doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+      doc.text(subtitulo, 210 - 15, 13, { align: 'right' });
+    }
+    doc.setDrawColor(...colorMorado);
+    doc.setLineWidth(0.3);
+    doc.line(10, 18, 200, 18);
+  }
+
+  // Helper: hex color a RGB array
+  function hexToRgb(hex) {
+    const r = parseInt(hex.slice(1,3), 16);
+    const g = parseInt(hex.slice(3,5), 16);
+    const b = parseInt(hex.slice(5,7), 16);
+    return [r, g, b];
+  }
+
+
 })();

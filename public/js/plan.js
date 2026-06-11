@@ -78,6 +78,17 @@
     return d.toLocaleDateString('es-CO', { day:'2-digit', month:'short', year:'numeric' });
   }
 
+  // Retorna: 'vencida', 'proxima' (<=3 días), 'ok', o null
+  function estadoFecha(fechaStr, estadoTarea) {
+    if (!fechaStr || estadoTarea === 'Terminado' || estadoTarea === 'Abortado') return null;
+    const hoy      = new Date(); hoy.setHours(0,0,0,0);
+    const limite   = new Date(fechaStr + 'T00:00:00');
+    const diffDias = Math.ceil((limite - hoy) / (1000 * 60 * 60 * 24));
+    if (diffDias < 0)  return 'vencida';
+    if (diffDias <= 3) return 'proxima';
+    return 'ok';
+  }
+
   function formatPesos(val) {
     if (!val) return null;
     return new Intl.NumberFormat('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 }).format(val);
@@ -106,6 +117,48 @@
     document.getElementById('progressFill').style.width  = `${progreso}%`;
     document.getElementById('progressStats').textContent =
       `${terminadas} de ${total} tarea${total !== 1 ? 's' : ''} completada${total !== 1 ? 's' : ''}`;
+    actualizarSalud();
+  }
+
+  function actualizarSalud() {
+    const saludEl = document.getElementById('saludIndicador');
+    if (!saludEl) return;
+
+    const activas   = todasLasTareas.filter(t => t.estado !== 'Terminado' && t.estado !== 'Abortado');
+    const vencidas  = activas.filter(t => estadoFecha(t.fecha_limite, t.estado) === 'vencida');
+    const proximas  = activas.filter(t => estadoFecha(t.fecha_limite, t.estado) === 'proxima');
+    const total     = todasLasTareas.length;
+    const terminadas = todasLasTareas.filter(t => t.estado === 'Terminado').length;
+    const pct       = total > 0 ? Math.round((terminadas / total) * 100) : 0;
+
+    let nivel, color, texto;
+
+    if (total === 0) {
+      nivel = 'sin-tareas'; color = '#475569';
+      texto = 'Sin tareas — crea tu plan de acción';
+    } else if (vencidas.length > 0) {
+      nivel = 'critico'; color = '#f43f5e';
+      texto = `${vencidas.length} tarea${vencidas.length>1?'s':''} vencida${vencidas.length>1?'s':''} — requiere atención inmediata`;
+    } else if (proximas.length > 0) {
+      nivel = 'alerta'; color = '#f59e0b';
+      texto = `${proximas.length} tarea${proximas.length>1?'s':''} próxima${proximas.length>1?'s':''} a vencer — revisa el plan`;
+    } else if (pct >= 80) {
+      nivel = 'excelente'; color = '#22c55e';
+      texto = `${pct}% completado — excelente avance`;
+    } else if (pct >= 40) {
+      nivel = 'bueno'; color = '#22d3ee';
+      texto = `${pct}% completado — buen ritmo`;
+    } else {
+      nivel = 'inicio'; color = '#a78bfa';
+      texto = `Plan en marcha — ${total - terminadas} tarea${total-terminadas!==1?'s':''} pendiente${total-terminadas!==1?'s':''}`;
+    }
+
+    saludEl.style.background   = color + '18';
+    saludEl.style.borderColor  = color + '55';
+    saludEl.style.color        = color;
+    saludEl.querySelector('.salud-dot').style.background  = color;
+    saludEl.querySelector('.salud-dot').style.boxShadow   = `0 0 8px ${color}88`;
+    saludEl.querySelector('.salud-texto').textContent     = texto;
   }
 
   // ── Select de iniciativas en el modal ─────────────────────────────────────
@@ -132,15 +185,31 @@
 
     listaEl.innerHTML = tareas.map(t => {
       const estadoCls  = 'estado-' + t.estado.replace(' ', '_');
-      const fechaHtml  = t.fecha_limite
-        ? `<div class="meta-chip">Fecha: ${formatFecha(t.fecha_limite)}</div>` : '';
-      const presHtml   = t.presupuesto
+      const ef         = estadoFecha(t.fecha_limite, t.estado);
+
+      // Chip de fecha con color según vencimiento
+      let fechaHtml = '';
+      if (t.fecha_limite) {
+        const chipCls = ef === 'vencida' ? 'meta-chip chip-vencida'
+                      : ef === 'proxima' ? 'meta-chip chip-proxima'
+                      : 'meta-chip';
+        const alerta  = ef === 'vencida' ? ' ⚠ Vencida'
+                      : ef === 'proxima' ? ' · Pronto'
+                      : '';
+        fechaHtml = `<div class="${chipCls}">Fecha: ${formatFecha(t.fecha_limite)}${alerta}</div>`;
+      }
+
+      const presHtml = t.presupuesto
         ? `<div class="meta-chip">Presupuesto: ${formatPesos(t.presupuesto)}</div>` : '';
-      const respHtml   = t.responsable
+      const respHtml = t.responsable
         ? `<div class="meta-chip">Resp.: ${escHtml(t.responsable)}</div>` : '';
 
+      // Borde de la tarjeta según vencimiento
+      const cardExtra = ef === 'vencida' ? ' tarea-vencida'
+                      : ef === 'proxima' ? ' tarea-proxima' : '';
+
       return `
-        <div class="tarea-card" data-id="${t.id}">
+        <div class="tarea-card${cardExtra}" data-id="${t.id}">
           <div class="tarea-top">
             <span class="tarea-desc">${escHtml(t.descripcion)}</span>
             <span class="estado-pill ${estadoCls}">${t.estado}</span>

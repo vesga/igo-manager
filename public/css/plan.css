@@ -159,3 +159,25 @@
   border-color: rgba(34,197,94,.3);
   color: var(--verde);
 }
+
+/* ── Alertas de vencimiento ──────────────────────────────────────────────── */
+.chip-vencida {
+  background: rgba(244,63,94,.15) !important;
+  border-color: rgba(244,63,94,.4) !important;
+  color: #fb7185 !important;
+  font-weight: 800;
+}
+.chip-proxima {
+  background: rgba(245,158,11,.12) !important;
+  border-color: rgba(245,158,11,.35) !important;
+  color: #fbbf24 !important;
+  font-weight: 800;
+}
+.tarea-vencida {
+  border-color: rgba(244,63,94,.4) !important;
+  box-shadow: 0 0 0 1px rgba(244,63,94,.15);
+}
+.tarea-proxima {
+  border-color: rgba(245,158,11,.35) !important;
+  box-shadow: 0 0 0 1px rgba(245,158,11,.1);
+}
