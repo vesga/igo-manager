@@ -12,18 +12,21 @@
 <body class="app-body">
 
   <nav class="app-navbar">
-    <a href="/app/dashboard" class="auth-logo">
-      <div class="brand-icon">I</div>
-      <span class="brand-name">IGO Manager</span>
-    </a>
-    <div class="app-nav-right">
-      <span class="nav-user" id="navUser">···</span>
-      <a href="/app/plan"      class="btn-nav-ghost" style="color:var(--accent2)">Plan de acción</a>
-      <a href="/app/dashboard" class="btn-nav-ghost">Matriz IGO</a>
-      <a href="/app/perfil"    class="btn-nav-ghost">Perfil</a>
-      <a href="/logout"        class="btn-nav-ghost">Salir</a>
-    </div>
-  </nav>
+  <a href="/app/dashboard" class="auth-logo">
+    <div class="brand-icon">I</div>
+    <span class="brand-name">IGO Manager</span>
+  </a>
+  <div class="app-nav-right" id="appNavRight">
+    <span class="nav-user" id="navUser">···</span>
+    <a href="/app/plan"      class="btn-nav-ghost" style="color:var(--accent2)">Plan de acción</a>
+    <a href="/app/dashboard" class="btn-nav-ghost">Matriz IGO</a>
+    <a href="/app/perfil"    class="btn-nav-ghost">Perfil</a>
+    <a href="/logout"        class="btn-nav-ghost">Salir</a>
+  </div>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
   <div class="app-container" style="max-width:860px">
 
@@ -199,5 +202,10 @@
   </div>
 
   <script src="/js/plan.js"></script>
+  <script>
+  document.getElementById('navHamburger').addEventListener('click', () => {
+    document.getElementById('appNavRight').classList.toggle('open');
+  });
+</script>
 </body>
 </html>

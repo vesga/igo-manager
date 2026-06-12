@@ -10,18 +10,21 @@
 </head>
 <body class="app-body">
 
-  <nav class="app-navbar">
-    <a href="/app/dashboard" class="auth-logo">
-      <div class="brand-icon">I</div>
-      <span class="brand-name">IGO Manager</span>
-    </a>
-    <div class="app-nav-right">
-      <span class="nav-user" id="navUser">···</span>
-      <a href="/app/plan"      class="btn-nav-ghost">Plan de acción</a>
-      <a href="/app/perfil"    class="btn-nav-ghost">Perfil</a>
-      <a href="/logout"        class="btn-nav-ghost">Salir</a>
-    </div>
-  </nav>
+ <nav class="app-navbar">
+  <a href="/app/dashboard" class="auth-logo">
+    <div class="brand-icon">I</div>
+    <span class="brand-name">IGO Manager</span>
+  </a>
+  <div class="app-nav-right" id="appNavRight">
+    <span class="nav-user" id="navUser">···</span>
+    <a href="/app/plan"      class="btn-nav-ghost">Plan de acción</a>
+    <a href="/app/perfil"    class="btn-nav-ghost">Perfil</a>
+    <a href="/logout"        class="btn-nav-ghost">Salir</a>
+  </div>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
   <div class="app-container" style="max-width:1100px">
 

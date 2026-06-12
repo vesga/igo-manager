@@ -11,15 +11,18 @@
 <body class="app-body">
 
   <nav class="app-navbar">
-    <a href="/admin" class="auth-logo">
-      <div class="brand-icon">I</div>
-      <span class="brand-name">IGO Manager <span class="admin-tag">Admin</span></span>
-    </a>
-    <div class="app-nav-right">
-      <span class="nav-user" id="navUser">···</span>
-      <a href="/logout" class="btn-nav-ghost">Salir</a>
-    </div>
-  </nav>
+  <a href="/admin" class="auth-logo">
+    <div class="brand-icon">I</div>
+    <span class="brand-name">IGO Manager <span class="admin-tag">Admin</span></span>
+  </a>
+  <div class="app-nav-right" id="appNavRight">
+    <span class="nav-user" id="navUser">···</span>
+    <a href="/logout" class="btn-nav-ghost">Salir</a>
+  </div>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
   <div class="app-container" style="max-width:1100px">
 
@@ -137,5 +140,29 @@
   <!-- Chart.js desde CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="/js/admin.js"></script>
+  <script>
+  document.getElementById('navHamburger').addEventListener('click', () => {
+    document.getElementById('appNavRight').classList.toggle('open');
+  });
+</script>
+<!-- Modal confirmar acción -->
+<div class="modal-overlay" id="modalConfirmar" style="display:none">
+  <div class="modal-box" style="max-width:420px">
+    <h2 style="font-size:1rem;margin-bottom:.5rem" id="modalConfirmarTitulo">Confirmar</h2>
+    <p id="modalConfirmarMsg" style="font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6"></p>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="btnConfirmarNo">Cancelar</button>
+      <button class="btn-primary"   id="btnConfirmarSi">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal alerta/info -->
+<div class="modal-overlay" id="modalAlerta" style="display:none">
+  <div class="modal-box" style="max-width:380px;text-align:center">
+    <p id="modalAlertaMsg" style="font-size:14px;font-weight:700;margin-bottom:1.5rem;line-height:1.6"></p>
+    <button class="btn-primary" id="btnAlertaOk" style="min-width:120px">OK</button>
+  </div>
+</div>
 </body>
 </html>

@@ -908,6 +908,10 @@
     const b = parseInt(hex.slice(5,7), 16);
     return [r, g, b];
   }
+  // Hamburger menu
+document.getElementById('navHamburger').addEventListener('click', () => {
+  document.getElementById('appNavRight').classList.toggle('open');
+});
 
 
 })();
